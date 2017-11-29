@@ -1,0 +1,22 @@
+{
+  "name": "shortcuthub",
+  "version": "1.0.0",
+  "description": "Storing shortcuts",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsc -w --outFile shortcuthub.js --pretty src/index.ts --module system"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andyzg/shortcuthub.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andyzg/shortcuthub/issues"
+  },
+  "homepage": "https://github.com/andyzg/shortcuthub#readme"
+}
