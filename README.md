@@ -1,0 +1,2 @@
+# shortcuthub
+Storing shortcuts
