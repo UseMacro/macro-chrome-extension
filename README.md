@@ -1,4 +1,4 @@
-# Shortcuthub
+# Macro
 Storing shortcuts
 
 ## Shortcut configuration file
