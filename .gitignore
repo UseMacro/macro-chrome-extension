@@ -59,3 +59,6 @@ typings/
 
 # bundle
 shortcuthub.js*
+
+# mac os
+.DS_Store
