@@ -4,7 +4,9 @@
   "description": "Storing shortcuts",
   "main": "index.js",
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "webpack": "^3.10.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc -w --outFile shortcuthub.js --pretty src/index.ts --module system"
