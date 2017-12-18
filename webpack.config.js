@@ -30,6 +30,7 @@ var options = {
     popup: path.join(__dirname, "chrome-extension", "js", "popup.js"),
     options: path.join(__dirname, "chrome-extension", "js", "options.ts"),
     background: path.join(__dirname, "chrome-extension", "js", "background.js")
+    // TODO: Add the independent library that renders the shortcuts
   },
 
   // All file outputs from webpack will be under the 'build/' directory.
