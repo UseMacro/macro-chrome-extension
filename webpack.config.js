@@ -21,12 +21,12 @@ if (fileSystem.existsSync(secretsPath)) {
 var options = {
   entry: {
     popup: path.join(__dirname, "chrome-extension", "js", "popup.js"),
-    options: path.join(__dirname, "chrome-extension", "js", "options.js"),
+    options: path.join(__dirname, "chrome-extension", "js", "options.ts"),
     background: path.join(__dirname, "chrome-extension", "js", "background.js")
   },
   output: {
     path: path.join(__dirname, "build"),
-    filename: "[name].bundle.js"
+    filename: "[name].js"
   },
   module: {
     rules: [
@@ -44,6 +44,10 @@ var options = {
         test: /\.html$/,
         loader: "html-loader",
         exclude: /node_modules/
+      },
+      {
+        test: /\.tsx?$/,
+        loader: "ts-loader"
       }
     ]
   },
@@ -58,11 +62,10 @@ var options = {
       "process.env.NODE_ENV": JSON.stringify(env.NODE_ENV)
     }),
     new CopyWebpackPlugin([{
-      from: "chrome-extension/manifest.json",
-      transform: function (content, path) {
-        // generates the manifest file using the package.json informations
-        return Buffer.from(content);
-      }
+      from: "chrome-extension/manifest.json"
+    }, {
+      from: "chrome-extension/img",
+      to: "./img"
     }]),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "chrome-extension", "popup.html"),
