@@ -5,7 +5,8 @@
     "description": "This extension allows the user to change the background color of the current page.",
     "version": "1.0",
     "background": {
-      "page": "background.html"
+      "scripts": ["js/background.js"],
+      "persistent": false
     },
     "options_page": "options.html",
     "browser_action": {
@@ -14,8 +15,19 @@
         "default_title": "Click here!"
     },
     "permissions": [
+        "tabs",
         "activeTab",
-        "storage"
+        "storage",
+        "https://raw.githubusercontent.com/chrisjluc/macro-data/master/*"
     ],
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "commands": {
+        "toggle-popup": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+Y",
+                "mac": "Command+Shift+Y"
+            },
+            "description": "Toggle Popup"
+        }
+    }
 }

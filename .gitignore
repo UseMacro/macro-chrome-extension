@@ -60,5 +60,9 @@ typings/
 # mac os
 .DS_Store
 
+# vim
+*.swp
+*.swo
+
 # Build output from Chrome extension
 build/
