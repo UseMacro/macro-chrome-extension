@@ -21,46 +21,21 @@ function getCurrentTabUrl(callback) {
 }
 
 function get(key, callback) {
-  getCurrentTab((tab) => {
-    _get(!tab.incognito, key, callback);
+  chrome.storage.sync.get(key, (items) => {
+    callback(chrome.runtime.lastError ? null : items[key]);
   });
-}
-
-function _get(isPersisted, key, callback) {
-  if (isPersisted) {
-    chrome.storage.sync.get(key, (items) => {
-      callback(chrome.runtime.lastError ? null : items[key]);
-    });
-  } else {
-    chrome.runtime.getBackgroundPage((bgPage) => {
-      callback(bgPage.hasOwnProperty(key) ? bgPage[key] : null);
-    });
-  }
 }
 
 function save(key, value) {
-  getCurrentTab((tab) => {
-    _save(!tab.incognito, key, value);
-  });
-}
-
-function _save(shouldPersist, key, value) {
-  if (shouldPersist) {
-    var items = {};
-    items[key] = value;
-    chrome.storage.sync.set(items);
-  } else {
-    chrome.runtime.getBackgroundPage((bgPage) => {
-      bgPage[key] = data;
-    });
-  }
+  var items = {};
+  items[key] = value;
+  chrome.storage.sync.set(items);
 }
 
 // Copied function from: https://stackoverflow.com/a/23945027
+  //find & remove protocol (http, ftp, etc.) and get hostname
 function extractHostname(url) {
   var hostname;
-  //find & remove protocol (http, ftp, etc.) and get hostname
-
   if (url.indexOf('://') > -1) {
     hostname = url.split('/')[2];
   } else {
@@ -70,9 +45,7 @@ function extractHostname(url) {
   //find & remove port number
   hostname = hostname.split(':')[0];
   //find & remove '?'
-  hostname = hostname.split('?')[0];
-
-  return hostname;
+  return hostname.split('?')[0];
 }
 
 // Copied function from: https://stackoverflow.com/a/23945027
@@ -81,8 +54,7 @@ function extractRootDomain(url) {
   splitArr = domain.split('.'),
   arrLen = splitArr.length;
 
-  //extracting the root domain here
-  //if there is a subdomain
+  //extracting the root domain here, check if there is a subdomain
   if (arrLen > 2) {
     domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
     //check to see if it's using a Country Code Top Level Domain (ccTLD) (i.e. '.me.uk')
