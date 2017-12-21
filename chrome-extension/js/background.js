@@ -1,7 +1,7 @@
 // Async load data for given web page on page load
 // Listen to events to render shortcuts library
 
-const URL_PATH = 'https://raw.githubusercontent.com/chrisjluc/macro-data/master/'
+const URL_PATH = 'https://raw.githubusercontent.com/UseMacro/macro-data/master/configs/'
 const FILE_EXT = '.json'
 
 function getCurrentTab(callback) {
