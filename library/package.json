@@ -1,5 +1,5 @@
 {
-  "name": "shortcuthub",
+  "name": "macro-lib",
   "version": "1.0.0",
   "description": "Storing shortcuts",
   "main": "index.js",

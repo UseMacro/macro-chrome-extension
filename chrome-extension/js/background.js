@@ -94,7 +94,7 @@ function saveData(url, callback) {
 }
 
 function togglePopup(data) {
-  // TODO: Render or close popup
+  chrome.tabs.executeScript({ file: 'init.js' });
   console.log(data);
 }
 
@@ -124,4 +124,3 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     saveData(tab.url, null);
   }
 });
-

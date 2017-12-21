@@ -29,8 +29,8 @@ var options = {
   entry: {
     popup: path.join(__dirname, "chrome-extension", "js", "popup.js"),
     options: path.join(__dirname, "chrome-extension", "js", "options.ts"),
-    background: path.join(__dirname, "chrome-extension", "js", "background.js")
-    // TODO: Add the independent library that renders the shortcuts
+    background: path.join(__dirname, "chrome-extension", "js", "background.js"),
+    init: path.join(__dirname, "chrome-extension", "js", "init.js"),
   },
 
   // All file outputs from webpack will be under the 'build/' directory.
@@ -63,6 +63,12 @@ var options = {
         // Handles compiling TypeScript files into JS
         test: /\.tsx?$/,
         loader: "ts-loader"
+      },
+      {
+        // Handles compiling React, ES7, ES6
+        test: /\.jsx?$/,
+        include: path.join(__dirname, "chrome-extension", "js", "init.js"),
+        loader: "babel-loader"
       }
     ]
   },
