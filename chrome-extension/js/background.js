@@ -94,7 +94,9 @@ function saveData(url, callback) {
 }
 
 function togglePopup(data) {
-  chrome.tabs.executeScript({ file: 'init.js' });
+  chrome.tabs.executeScript({ code: 'var data = ' + JSON.stringify(data) + ';' }, () => {
+    chrome.tabs.executeScript({ file: 'init.js' })
+  });
   console.log(data);
 }
 
