@@ -188,8 +188,8 @@ function getGithubPlugins() {
       description: 'custom plugin for github',
       keys:
       [{
-        "windows": ["k"],
-        "default": ["k"],
+        "windows": ["cmd", "up"],
+        "default": ["cmd", "up"],
         "macos": ["cmd", "up"]
       }],
       action: () => {
@@ -197,13 +197,13 @@ function getGithubPlugins() {
       }
     },
     {
-      section: 'New Section',
+      section: 'Test Section',
       name: 'test plugin',
       description: 'custom plugin for github',
       keys:
       [{
         "windows": ["k"],
-        "default": ["cmd", "k"],
+        "default": ["k"],
         "macos": ["k"]
       }],
       action: () => {
