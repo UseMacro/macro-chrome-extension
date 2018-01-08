@@ -37,7 +37,6 @@ function initPlugins() {
   var map = {};
   onkeydown = onkeyup = function(e){
     map[e.key] = e.type == 'keydown';
-    console.log(map);
     plugins.some((plugin) => {
       return plugin.keys.some((shortcutKeys) => {
         // TODO(chris): Make exact keys need to be pressed to register, currently if a subset of keys are pressed it will register
