@@ -1,10 +1,12 @@
 export class Plugin {
   domain: string;
   shortcuts: object;
+  state: object;
 
-  constructor(domain: string, shortcuts: object) {
+  constructor(domain: string, shortcuts: object, state: object) {
     this.domain = domain;
     this.shortcuts = shortcuts;
+    this.state = state;
   }
 
   listShortcuts() : string[] {
@@ -14,14 +16,31 @@ export class Plugin {
   getShortcut(name: string) : object {
     return this.shortcuts[name];
   }
+
+  getState(key: string) : object{
+    if (!key) {
+      throw 'Error: must include the key of the state.';
+    }
+    return this.state[key];
+  }
+
+  getFullState() : object {
+    return this.state;
+  }
+
+  setState(key: string, value: object) {
+    this.state[key] = value;
+  }
 }
 
 export class PluginBuilder {
   domain: string;
   shortcuts: object;
+  state: object;
 
   constructor() {
     this.shortcuts = {};
+    this.state = {};
   }
 
   // TODO: What's better design, giving a config object or passing in multiple
@@ -74,6 +93,10 @@ export class PluginBuilder {
     return true;
   }
 
+  setInitialState(state: object) {
+    this.state = state;
+  }
+
   build() : Plugin {
     if (!this.domain) {
       throw 'Domain name is missing';
@@ -83,6 +106,6 @@ export class PluginBuilder {
       throw 'You need at least one shortcut for a plugin.';
     }
 
-    return new Plugin(this.domain, this.shortcuts);
+    return new Plugin(this.domain, this.shortcuts, this.state);
   }
 }
