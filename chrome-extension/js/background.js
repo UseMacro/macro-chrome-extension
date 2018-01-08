@@ -71,26 +71,62 @@ function getKey(url) {
   return URL_PATH.concat(domain, FILE_EXT);
 }
 
-function saveData(url, callback) {
+function getShortcutData(key, callback) {
   var xhr = new XMLHttpRequest();
-  var key = getKey(url);
   xhr.open('GET', key, true);
-  xhr.onload = function (e) {
+  xhr.onload = (e) => {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        save(key, xhr.responseText);
-        if (callback != null) {
-          callback(xhr.responseText);
-        }
+        var json = JSON.parse(xhr.responseText);
+        callback(json);
       } else {
         console.error(xhr.statusText);
       }
     }
   };
-  xhr.onerror = function (e) {
+  xhr.onerror = (e) => {
     console.error(xhr.statusText);
   };
   xhr.send(null);
+}
+
+function mergeData(shortcuts, plugins) {
+  var sections = shortcuts.sections;
+  for (var i = 0; i < plugins.length; i++) {
+    for (var j = 0; j < sections.length; j++) {
+      var plugin = plugins[i];
+      var section = sections[j];
+      var shortcut = {
+        name: plugin.name,
+        description: plugin.description,
+        keys: plugin.keys
+      };
+      if (plugin.section == section.name) {
+        section.shortcuts.push(shortcut);
+      } else {
+        sections.push({name: plugin.section, description: '', shortcuts: [shortcut]});
+      }
+    }
+  }
+  return shortcuts;
+}
+
+function initPlugins(plugins) {
+  // TODO: create listener for plugin
+}
+
+function initShortcuts(url, callback) {
+  var domain = extractRootDomain(url);
+  getPlugins(domain, (plugins) => {
+    var key = getKey(url);
+    getShortcutData(key, (shortcuts) => {
+      var data = mergeData(shortcuts, plugins);
+      console.log(shortcuts);
+      console.log(data);
+      save(key, data);
+    });
+    initPlugins(plugins);
+  });
 }
 
 function togglePopup(data) {
@@ -110,7 +146,7 @@ chrome.commands.onCommand.addListener((command) => {
       var key = getKey(url)
         get(key, (data) => {
           if (isEmpty(data)) {
-            saveData(url, (data) => {
+            initShortcuts(url, (data) => {
               togglePopup(data);
             });
           } else {
@@ -123,6 +159,34 @@ chrome.commands.onCommand.addListener((command) => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.hasOwnProperty('url')) {
-    saveData(tab.url, null);
+    initShortcuts(tab.url, null);
   }
 });
+
+function getPlugins(domain, callback) {
+  // TODO (Chris): Update to make it generic
+  if (domain === 'github.com') {
+    callback(getGithubPlugins());
+  } else {
+    callback([]);
+  }
+}
+
+function getGithubPlugins() {
+  return [{
+    section: 'navigation',
+    name: 'test plugin',
+    description: 'custom plugin for github',
+    keys: [
+    {
+      "windows": ["k"],
+      "default": ["cmd", "up"],
+      "macos": ["cmd", "up"]
+    }
+    ],
+    action: () => {
+      alert('Test plugin');
+    }
+  }];
+}
+
