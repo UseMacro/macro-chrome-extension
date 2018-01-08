@@ -1,6 +1,9 @@
 # Macro
 Storing shortcuts
 
+## Getting Started
+`webpack --watch`
+
 ## Shortcut configuration file
 
 All shortcut configuration files are stored within a JSON file. The naming
@@ -35,8 +38,8 @@ Each object within the section should contain the following properties:
 `shortcut`: A <shortcut-value>. This can either be a list of shortcuts, or a
 shortcut (global shortcut or OS-dependent shortcut).
 
-**List of shortcuts**: This is a list of shortcut strings. Within a list, each 
-value is either a **shortcut** or a **OS-dependent shortcut**. 
+**List of shortcuts**: This is a list of shortcut strings. Within a list, each
+value is either a **shortcut** or a **OS-dependent shortcut**.
 
 Example:
 ```
@@ -54,7 +57,7 @@ Example:
 ```
 
 **Global shortcut (String)**: This is a string value with keys separated by a
-`+`. At most one character key can be used, but multiple modifier keys can be used. This 
+`+`. At most one character key can be used, but multiple modifier keys can be used. This
 value is case sensitive. Modifier keys(Ctrl, alt, etc.) are not case
 sensitive. For example:
 ```
@@ -69,7 +72,7 @@ sensitive. For example:
 ```
 
 **OS-dependent shortcut (Object)**: This is an object that contains three
-values: 
+values:
 - `windows`: The shortcut shown on a Windows machine.
 - `macos`: The shortcut shown on a macOS machine.
 - `linux` (optional): The shortcut shown on a Linux machine. Defaults to windows if not provided.

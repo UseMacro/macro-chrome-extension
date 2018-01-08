@@ -114,7 +114,16 @@ function mergeData(shortcuts, plugins) {
 }
 
 function initPlugins(plugins) {
-  // TODO: create listener for plugin
+  data = [];
+  plugins.forEach((plugin) => {
+    data.push({
+      keys: plugin.keys,
+      action: plugin.action.toString()
+    });
+  });
+  chrome.tabs.executeScript({ code: 'var plugins = ' + JSON.stringify(data) + ';' }, () => {
+    chrome.tabs.executeScript({ file: 'plugins.js' })
+  });
 }
 
 function initShortcuts(url, callback) {
@@ -177,13 +186,12 @@ function getGithubPlugins() {
       section: 'Navigation',
       name: 'test plugin',
       description: 'custom plugin for github',
-      keys: [
-      {
+      keys:
+      [{
         "windows": ["k"],
-        "default": ["cmd", "up"],
+        "default": ["k"],
         "macos": ["cmd", "up"]
-      }
-      ],
+      }],
       action: () => {
         alert('Test plugin');
       }
@@ -192,13 +200,12 @@ function getGithubPlugins() {
       section: 'New Section',
       name: 'test plugin',
       description: 'custom plugin for github',
-      keys: [
-      {
+      keys:
+      [{
         "windows": ["k"],
-        "default": ["cmd", "up"],
-        "macos": ["cmd", "up"]
-      }
-      ],
+        "default": ["cmd", "k"],
+        "macos": ["k"]
+      }],
       action: () => {
         alert('New section plugin');
       }
