@@ -172,20 +172,37 @@ function getPlugins(domain, callback) {
 }
 
 function getGithubPlugins() {
-  return [{
-    section: 'navigation',
-    name: 'test plugin',
-    description: 'custom plugin for github',
-    keys: [
+  return [
     {
-      "windows": ["k"],
-      "default": ["cmd", "up"],
-      "macos": ["cmd", "up"]
+      section: 'Navigation',
+      name: 'test plugin',
+      description: 'custom plugin for github',
+      keys: [
+      {
+        "windows": ["k"],
+        "default": ["cmd", "up"],
+        "macos": ["cmd", "up"]
+      }
+      ],
+      action: () => {
+        alert('Test plugin');
+      }
+    },
+    {
+      section: 'New Section',
+      name: 'test plugin',
+      description: 'custom plugin for github',
+      keys: [
+      {
+        "windows": ["k"],
+        "default": ["cmd", "up"],
+        "macos": ["cmd", "up"]
+      }
+      ],
+      action: () => {
+        alert('New section plugin');
+      }
     }
-    ],
-    action: () => {
-      alert('Test plugin');
-    }
-  }];
+  ];
 }
 
