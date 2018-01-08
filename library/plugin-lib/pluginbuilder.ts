@@ -1,23 +1,13 @@
-export class Plugin {
-  domain: string;
-  shortcuts: object;
+import * as key from 'keymaster';
+
+class PluginState {
   state: object;
 
-  constructor(domain: string, shortcuts: object, state: object) {
-    this.domain = domain;
-    this.shortcuts = shortcuts;
+  constructor(state: object) {
     this.state = state;
   }
 
-  listShortcuts() : string[] {
-    return Object.keys(this.shortcuts);
-  }
-
-  getShortcut(name: string) : object {
-    return this.shortcuts[name];
-  }
-
-  getState(key: string) : object{
+  get(key: string) : object {
     if (!key) {
       throw 'Error: must include the key of the state.';
     }
@@ -28,8 +18,38 @@ export class Plugin {
     return this.state;
   }
 
-  setState(key: string, value: object) {
+  set(key: string, value: object) {
     this.state[key] = value;
+  }
+}
+
+export class Plugin {
+  domain: string;
+  shortcuts: object;
+  state: object;
+
+  constructor(domain: string, shortcuts: object, state: object) {
+    this.domain = domain;
+    this.shortcuts = shortcuts;
+    this.pluginState = new PluginState(state);
+
+    initAllShortcuts();
+  }
+
+  initAllShortcuts() {
+    for (let i in this.shortcuts) {
+      key(this.shortcuts[i].shortcut, (event, handler) => {
+        this.shortcuts[i].action(event, this.pluginState);
+      });
+    }
+  }
+
+  listShortcuts() : string[] {
+    return Object.keys(this.shortcuts);
+  }
+
+  getShortcut(name: string) : object {
+    return this.shortcuts[name];
   }
 }
 
@@ -43,11 +63,9 @@ export class PluginBuilder {
     this.state = {};
   }
 
-  // TODO: What's better design, giving a config object or passing in multiple
-  // objects?
+  // TODO: Handle scopes from keymaster
   registerShortcut(name: string,
                    shortcut: string | string[],
-                   description: string,
                    action: Function) : void {
     if (!name) {
       throw 'Must include a name.';
@@ -55,7 +73,6 @@ export class PluginBuilder {
 
     let config = {
       shortcut,
-      description,
       action
     }
     this.validateConfig(config)
@@ -69,20 +86,13 @@ export class PluginBuilder {
 
   validateConfig(config: object) : boolean {
     // Structure: {
-    //   'shortcut': string | string[],
-    //   'description': 'Description of the shortcut.',
+    //   'shortcut': string,
     //   'action': <function Function>
     // }
 
     // Validate shortcut
-    if (!(config['shortcut'].constructor === Array ||
-         typeof config['shortcut'] === 'string')) {
+    if (!typeof config['shortcut'] === 'string') {
       throw 'Invalid or missing shortcut';
-    }
-
-    // Validate description
-    if (typeof config['description'] !== 'string') {
-      throw 'Invalid or missing description';
     }
 
     // Validate action

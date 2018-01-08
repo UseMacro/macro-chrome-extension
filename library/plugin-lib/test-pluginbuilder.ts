@@ -1,7 +1,7 @@
 import { Plugin, PluginBuilder } from './pluginbuilder.ts';
 
 let pb = new PluginBuilder();
-pb.registerShortcut('h', 'a', 'a', () => {});
+pb.registerShortcut('h', 'a', () => {});
 pb.setDomainName('google.com');
 
 let plugin = pb.build();
