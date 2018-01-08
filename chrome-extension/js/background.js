@@ -103,8 +103,10 @@ function mergeData(shortcuts, plugins) {
       };
       if (plugin.section == section.name) {
         section.shortcuts.push(shortcut);
-      } else {
+        break;
+      } else if (j == sections.length - 1) {
         sections.push({name: plugin.section, description: '', shortcuts: [shortcut]});
+        break;
       }
     }
   }
@@ -121,8 +123,6 @@ function initShortcuts(url, callback) {
     var key = getKey(url);
     getShortcutData(key, (shortcuts) => {
       var data = mergeData(shortcuts, plugins);
-      console.log(shortcuts);
-      console.log(data);
       save(key, data);
     });
     initPlugins(plugins);
@@ -133,7 +133,6 @@ function togglePopup(data) {
   chrome.tabs.executeScript({ code: 'var data = ' + JSON.stringify(data) + ';' }, () => {
     chrome.tabs.executeScript({ file: 'init.js' })
   });
-  console.log(data);
 }
 
 function isEmpty(obj) {
