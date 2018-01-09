@@ -18,7 +18,6 @@
         "tabs",
         "activeTab",
         "storage",
-        "https://raw.githubusercontent.com/chrisjluc/macro-data/master/*",
         "http://*/",
         "https://*/"
     ],
