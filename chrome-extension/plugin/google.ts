@@ -1,8 +1,13 @@
-import { Plugin, PluginBuilder } from '../plugin-lib/pluginbuilder.ts';
+import { Plugin, PluginBuilder } from './pluginbuilder.ts';
 
 class GooglePage {
+  links: HTMLElement[];
+  nextPage: HTMLElement;
+  prevPage: HTMLElement;
+  searchInput: HTMLElement;
 
-  constructor(links: HTMLElement[], nextPage: HTMLElement, prevPage: HTMLElement) {
+
+  constructor() {
     this.links = Array.prototype.slice.call(document.querySelectorAll('h3.r a'));
     this.nextPage = document.querySelector('#pnnext');
     this.prevPage = document.querySelector('#pnprev');
@@ -26,15 +31,24 @@ class GooglePage {
   }
 }
 
+//////////////////////
+// Helper functions //
+//////////////////////
+function updateFocusedLink(index) {
+  console.log(index);
+}
+
 let page = new GooglePage();
 
 let shortcuts = {
   nextLink: 'j',
-  previousLink: 'k'
+  previousLink: 'k',
   nextPage: 'l',
   previousPage: 'h',
   focusSearchInput: '/'
 };
+
+///////////////////////
 
 let pb = new PluginBuilder();
 
@@ -44,7 +58,8 @@ pb.setInitialState({
 });
 
 pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
-  let nextIndex = state.getState('linkIndex') + 1;
+  console.log('i clicked j');
+  let nextIndex = state.get('linkIndex') + 1;
   if (nextIndex >= page.getLinkCount()) {
     nextIndex--; // TODO: What to do if overflow?
   }
@@ -54,8 +69,8 @@ pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
   updateFocusedLink(state.get('linkIndex'));
 });
 
-pb.registerShortcut('Previous link', shortcuts.previous, (event, state) => {
-  let prevIndex = state.getState('linkIndex') - 1;
+pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
+  let prevIndex = state.get('linkIndex') - 1;
   if (prevIndex < 0) {
     prevIndex = 0; // TODO: What to do if overflow?
   }
@@ -65,9 +80,6 @@ pb.registerShortcut('Previous link', shortcuts.previous, (event, state) => {
   updateFocusedLink(state.get('linkIndex'));
 });
 
-//////////////////////
-// Helper functions //
-//////////////////////
-function updateFocusedLink(index) {
-  console.log(index);
-}
+let plugin = pb.build();
+
+export default plugin;

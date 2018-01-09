@@ -1,62 +1,72 @@
 import * as key from 'keymaster';
 
 class PluginState {
-  state: object;
+  state: any;
 
-  constructor(state: object) {
+  constructor(state: any) {
     this.state = state;
   }
 
-  get(key: string) : object {
+  get(key: string) : any {
     if (!key) {
       throw 'Error: must include the key of the state.';
     }
     return this.state[key];
   }
 
-  getFullState() : object {
+  getFullState() : any {
     return this.state;
   }
 
-  set(key: string, value: object) {
+  set(key: string, value: any) {
     this.state[key] = value;
   }
 }
 
 export class Plugin {
   domain: string;
-  shortcuts: object;
-  state: object;
+  shortcuts: any[];
+  pluginState: any;
 
-  constructor(domain: string, shortcuts: object, state: object) {
+  constructor(domain: string, shortcuts: any[], state: any) {
     this.domain = domain;
     this.shortcuts = shortcuts;
     this.pluginState = new PluginState(state);
-
-    initAllShortcuts();
+    this.init();
   }
 
-  initAllShortcuts() {
-    for (let i in this.shortcuts) {
-      key(this.shortcuts[i].shortcut, (event, handler) => {
-        this.shortcuts[i].action(event, this.pluginState);
-      });
-    }
+  init() {
+    (chrome as any).runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.loadShortcuts) {
+        for (let s of this.shortcuts) {
+          console.log(s);
+          key(s.shortcut[0], (event, handler) => { // TODO: Handle multiple shortcuts
+            s.action(event, this.pluginState);
+          });
+        }
+      }
+    });
   }
 
-  listShortcuts() : string[] {
-    return Object.keys(this.shortcuts);
+  listShortcuts() : any[] {
+    // Only include name and shortcut
+    return this.shortcuts.map((s) => {
+      return {
+        name: s.name,
+        shortcut: s.shortcut
+      };
+    });
   }
 
-  getShortcut(name: string) : object {
+  getShortcut(name: string) : any {
     return this.shortcuts[name];
   }
 }
 
 export class PluginBuilder {
   domain: string;
-  shortcuts: object;
-  state: object;
+  shortcuts: any;
+  state: any;
 
   constructor() {
     this.shortcuts = {};
@@ -84,14 +94,14 @@ export class PluginBuilder {
     this.domain = domainName;
   }
 
-  validateConfig(config: object) : boolean {
+  validateConfig(config: any) : boolean {
     // Structure: {
     //   'shortcut': string,
     //   'action': <function Function>
     // }
 
     // Validate shortcut
-    if (!typeof config['shortcut'] === 'string') {
+    if (typeof config['shortcut'] !== 'string') {
       throw 'Invalid or missing shortcut';
     }
 
@@ -103,7 +113,7 @@ export class PluginBuilder {
     return true;
   }
 
-  setInitialState(state: object) {
+  setInitialState(state: any) {
     this.state = state;
   }
 
@@ -116,6 +126,15 @@ export class PluginBuilder {
       throw 'You need at least one shortcut for a plugin.';
     }
 
-    return new Plugin(this.domain, this.shortcuts, this.state);
+    let shortcuts = [];
+    for (let key in this.shortcuts) {
+      shortcuts.push({
+        name: key,
+        shortcut: this.shortcuts[key].shortcut,
+        action: this.shortcuts[key].action
+      });
+    }
+
+    return new Plugin(this.domain, shortcuts, this.state);
   }
 }

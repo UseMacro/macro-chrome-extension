@@ -1,3 +1,5 @@
+import * as Plugins from '../plugin/plugins.ts';
+
 // Async load data for given web page on page load
 // Listen to events to render shortcuts library
 
@@ -131,7 +133,7 @@ function initShortcuts(url, callback) {
   getPlugins(domain, (plugins) => {
     var key = getKey(url);
     getShortcutData(key, (shortcuts) => {
-      var data = mergeData(shortcuts, plugins);
+      var data = mergeData(shortcuts, plugins.listShortcuts());
       save(key, data);
     });
     initPlugins(plugins);
@@ -166,12 +168,23 @@ chrome.commands.onCommand.addListener((command) => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete') {
+    chrome.tabs.executeScript({ file: 'google.js' }, () => {
+      chrome.tabs.sendMessage(tabId, { loadShortcuts: true });
+    });
+  }
+
   if (changeInfo.hasOwnProperty('url')) {
     initShortcuts(tab.url, null);
   }
 });
 
 function getPlugins(domain, callback) {
+  let plugin = Plugins[domain];
+  if (!plugin) { return; }
+
+  callback(plugin);
+
   // TODO (Chris): Update to make it generic
   if (domain === 'github.com') {
     callback(getGithubPlugins());

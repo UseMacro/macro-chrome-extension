@@ -32,6 +32,7 @@ var options = {
     background: path.join(__dirname, "chrome-extension", "js", "background.js"),
     init: path.join(__dirname, "chrome-extension", "js", "init.js"),
     plugins: path.join(__dirname, "chrome-extension", "js", "plugins.js")
+    google: path.join(__dirname, "chrome-extension", "plugin", "google.ts"),
   },
 
   // All file outputs from webpack will be under the 'build/' directory.
