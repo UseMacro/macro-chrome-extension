@@ -18,8 +18,10 @@ class PluginState {
     return this.state;
   }
 
-  set(key: string, value: any) {
-    this.state[key] = value;
+  set(obj: any) {
+    for (let key in obj) {
+      this.state[key] = obj[key];
+    }
   }
 }
 
@@ -36,10 +38,9 @@ export class Plugin {
   }
 
   init() {
-    (chrome as any).runtime.onMessage.addListener((request, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.loadShortcuts) {
         for (let s of this.shortcuts) {
-          console.log(s);
           key(s.shortcut[0], (event, handler) => { // TODO: Handle multiple shortcuts
             s.action(event, this.pluginState);
           });

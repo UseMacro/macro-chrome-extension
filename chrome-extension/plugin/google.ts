@@ -1,4 +1,5 @@
 import { Plugin, PluginBuilder } from './pluginbuilder.ts';
+import * as styles from './google.css';
 
 class GooglePage {
   links: HTMLElement[];
@@ -35,7 +36,7 @@ class GooglePage {
 // Helper functions //
 //////////////////////
 function updateFocusedLink(index) {
-  console.log(index);
+  page.getLink(index).className += ' ' + styles.test;
 }
 
 let page = new GooglePage();
@@ -58,7 +59,9 @@ pb.setInitialState({
 });
 
 pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
-  console.log('i clicked j');
+  // Clear existing classes
+  page.getLink(state.get('linkIndex')).classList.remove(styles.test);
+
   let nextIndex = state.get('linkIndex') + 1;
   if (nextIndex >= page.getLinkCount()) {
     nextIndex--; // TODO: What to do if overflow?
@@ -70,6 +73,9 @@ pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
 });
 
 pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
+  // Clear existing classes
+  page.getLink(state.get('linkIndex')).classList.remove(styles.test);
+
   let prevIndex = state.get('linkIndex') - 1;
   if (prevIndex < 0) {
     prevIndex = 0; // TODO: What to do if overflow?
@@ -83,3 +89,4 @@ pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
 let plugin = pb.build();
 
 export default plugin;
+

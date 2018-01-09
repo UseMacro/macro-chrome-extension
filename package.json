@@ -19,6 +19,9 @@
     "write-file-webpack-plugin": "^4.2.0"
   },
   "dependencies": {
-    "keymaster": "^1.6.2"
+    "@types/chrome": "^0.0.58",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "keymaster": "^1.6.2",
+    "typings-for-css-modules-loader": "^1.7.0"
   }
 }

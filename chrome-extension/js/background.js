@@ -170,6 +170,9 @@ chrome.commands.onCommand.addListener((command) => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
     chrome.tabs.executeScript({ file: 'google.js' }, () => {
+      chrome.tabs.insertCSS(tabId, { file: 'google.css' }, function() {
+        console.log('css inserted');
+      });
       chrome.tabs.sendMessage(tabId, { loadShortcuts: true });
     });
   }

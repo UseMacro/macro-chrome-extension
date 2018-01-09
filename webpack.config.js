@@ -14,7 +14,10 @@ var webpack = require("webpack"),
 
     // Forces webpack-dev-server program to write bundle files to the file system.
     // TODO: Might not even need this.
-    WriteFilePlugin = require("write-file-webpack-plugin");
+    WriteFilePlugin = require("write-file-webpack-plugin"),
+
+    // Separates CSS into a separate file.
+    ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 // load the secrets
 var alias = {};
@@ -31,7 +34,7 @@ var options = {
     options: path.join(__dirname, "chrome-extension", "js", "options.ts"),
     background: path.join(__dirname, "chrome-extension", "js", "background.js"),
     init: path.join(__dirname, "chrome-extension", "js", "init.js"),
-    plugins: path.join(__dirname, "chrome-extension", "js", "plugins.js")
+    plugins: path.join(__dirname, "chrome-extension", "js", "plugins.js"),
     google: path.join(__dirname, "chrome-extension", "plugin", "google.ts"),
   },
 
@@ -46,7 +49,19 @@ var options = {
       {
         // Bundles all imported CSS files into one file
         test: /\.css$/,
-        loader: "style-loader!css-loader",
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: {
+            loader: 'typings-for-css-modules-loader',
+            options: {
+              sourceMap: true,
+              importLoaders: 3,
+              modules: true,
+              namedExport: true,
+              camelCase: true
+            }
+          },
+        }),
         exclude: /node_modules/
       },
       {
@@ -111,6 +126,7 @@ var options = {
       filename: "background.html",
       chunks: ["background"]
     }),
+    new ExtractTextPlugin('google.css'),
     new WriteFilePlugin()
   ]
 };
