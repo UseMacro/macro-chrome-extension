@@ -36,7 +36,7 @@ export class Plugin {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.loadShortcuts) {
         for (let s of this.shortcuts) {
-          key(s.shortcut[0], (event, handler) => { // TODO: Handle multiple shortcuts
+          key(s.shortcut.join(', ', (event, handler) => {
             s.action(event, this.pluginState);
           });
         }
