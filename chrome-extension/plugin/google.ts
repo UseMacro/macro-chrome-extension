@@ -5,8 +5,8 @@ let HIGHLIGHTED_LINK_MARGIN = 100;
 
 class GooglePage {
   links: HTMLElement[];
-  nextPage: HTMLElement;
-  prevPage: HTMLElement;
+  nextPage: HTMLAnchorElement;
+  prevPage: HTMLAnchorElement;
   searchInput: HTMLElement;
 
 
@@ -25,11 +25,11 @@ class GooglePage {
     return this.links.length;
   }
 
-  getNextPage() : HTMLElement {
+  getNextPage() : HTMLAnchorElement {
     return this.nextPage;
   }
 
-  getPreviousPage() : HTMLElement {
+  getPreviousPage() : HTMLAnchorElement {
     return this.prevPage;
   }
 }
