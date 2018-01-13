@@ -87,6 +87,24 @@ pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
   updateFocusedLink(state.linkIndex);
 });
 
+pb.registerShortcut('Next page', shortcuts.nextPage, (event, state) => {
+  let nextPage = page.getNextPage();
+  if (!nextPage) {
+    return;
+  }
+
+  location.href = nextPage.href;
+});
+
+pb.registerShortcut('Previous page', shortcuts.previousPage, (event, state) => {
+  let prevPage = page.getPreviousPage();
+  if (!prevPage) {
+    return;
+  }
+
+  location.href = prevPage.href;
+});
+
 let plugin = pb.build();
 
 export default plugin;
