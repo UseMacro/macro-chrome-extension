@@ -36,7 +36,8 @@ export class Plugin {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.loadShortcuts) {
         for (let s of this.shortcuts) {
-          key(s.shortcut.join(', ', (event, handler) => {
+          console.log(s.shortcut);
+          key(s.shortcut.join(', '), (event, handler) => {
             s.action(event, this.pluginState);
           });
         }
@@ -77,10 +78,15 @@ export class PluginBuilder {
       throw 'Must include a name.';
     }
 
+    if (typeof shortcut === 'string') {
+      shortcut = [shortcut];
+    }
+
     let config = {
       shortcut,
       action
     }
+
     this.validateConfig(config)
     this.shortcuts[name] = config;
   }
@@ -97,7 +103,7 @@ export class PluginBuilder {
     // }
 
     // Validate shortcut
-    if (typeof config['shortcut'] !== 'string') {
+    if (config.shortcut.constructor !== Array) {
       throw 'Invalid or missing shortcut';
     }
 

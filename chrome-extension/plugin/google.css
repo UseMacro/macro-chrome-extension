@@ -1,3 +1,6 @@
-.test {
-  background-color: green !important;
+.test::before {
+  content: '▶';
+  position: absolute;
+  margin-right: 25px;
+  left: -25px;
 }

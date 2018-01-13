@@ -1,6 +1,8 @@
 import { Plugin, PluginBuilder } from './pluginbuilder.ts';
 import * as styles from './google.css';
 
+let HIGHLIGHTED_LINK_MARGIN = 100;
+
 class GooglePage {
   links: HTMLElement[];
   nextPage: HTMLElement;
@@ -35,12 +37,27 @@ class GooglePage {
 //////////////////////
 // Helper functions //
 //////////////////////
+function getLink(page, index) {
+  return page.getLink(index);
+}
+
 function updateFocusedLink(index) {
-  page.getLink(index).className += ' ' + styles.test;
+  let link = getLink(page, index);
+  link.className += ' ' + styles.test;
+  let linkPos = link.getBoundingClientRect().top;
+
+  if (linkPos < HIGHLIGHTED_LINK_MARGIN) {
+    // If the link is at the top of the screen
+    window.scrollTo(window.pageXOffset, window.pageYOffset + linkPos - HIGHLIGHTED_LINK_MARGIN);
+  } else if (linkPos > window.innerHeight - HIGHLIGHTED_LINK_MARGIN) {
+    // If the link is below the screen
+    window.scrollTo(window.pageXOffset, window.pageYOffset + (linkPos - window.innerHeight + HIGHLIGHTED_LINK_MARGIN + link.clientHeight));
+  }
 }
 
 function clearHighlight(page, index) {
-  page.getLink(index).classList.remove(styles.test);
+  let link = getLink(page, index);
+  link.classList.remove(styles.test);
 }
 
 //////////////////////
