@@ -4,23 +4,18 @@ class PluginState {
   state: any;
 
   constructor(state: any) {
-    this.state = state;
-  }
-
-  get(key: string) : any {
-    if (!key) {
-      throw 'Error: must include the key of the state.';
+    for (let key in state) {
+      this[key] = state[key]
     }
-    return this.state[key];
   }
 
   getFullState() : any {
-    return this.state;
+    return this;
   }
 
   set(obj: any) {
     for (let key in obj) {
-      this.state[key] = obj[key];
+      this[key] = obj[key];
     }
   }
 }

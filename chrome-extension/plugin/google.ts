@@ -39,6 +39,13 @@ function updateFocusedLink(index) {
   page.getLink(index).className += ' ' + styles.test;
 }
 
+function clearHighlight(page, index) {
+  page.getLink(index).classList.remove(styles.test);
+}
+
+//////////////////////
+// Application code //
+//////////////////////
 let page = new GooglePage();
 
 let shortcuts = {
@@ -60,33 +67,26 @@ pb.setInitialState({
 
 pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
   // Clear existing classes
-  page.getLink(state.get('linkIndex')).classList.remove(styles.test);
+  clearHighlight(page, state.linkIndex);
 
-  let nextIndex = state.get('linkIndex') + 1;
-  if (nextIndex >= page.getLinkCount()) {
-    nextIndex--; // TODO: What to do if overflow?
-  }
+  let nextIndex = Math.min(state.linkIndex + 1, page.getLinkCount() - 1);
   state.set({ linkIndex: nextIndex });
 
   // Update which link is focused
-  updateFocusedLink(state.get('linkIndex'));
+  updateFocusedLink(state.linkIndex);
 });
 
 pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
   // Clear existing classes
-  page.getLink(state.get('linkIndex')).classList.remove(styles.test);
+  clearHighlight(page, state.linkIndex);
 
-  let prevIndex = state.get('linkIndex') - 1;
-  if (prevIndex < 0) {
-    prevIndex = 0; // TODO: What to do if overflow?
-  }
+  let prevIndex = Math.max(state.linkIndex - 1, 0);
   state.set({ linkIndex: prevIndex });
 
   // Update which link is focused
-  updateFocusedLink(state.get('linkIndex'));
+  updateFocusedLink(state.linkIndex);
 });
 
 let plugin = pb.build();
 
 export default plugin;
-
