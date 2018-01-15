@@ -1,4 +1,5 @@
-import * as Plugins from '../plugin/plugins.ts';
+import * as P from '../plugin/plugins.ts';
+let Plugins = P.default;
 
 // Async load data for given web page on page load
 // Listen to events to render shortcuts library
@@ -167,16 +168,23 @@ chrome.commands.onCommand.addListener((command) => {
   }
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete') {
-    chrome.tabs.executeScript({ file: 'google.js' }, () => {
-      chrome.tabs.insertCSS(tabId, { file: 'google.css' }, function() {
-        console.log('css inserted');
-      });
-      chrome.tabs.sendMessage(tabId, { loadShortcuts: true });
-    });
+chrome.webNavigation.onCompleted.addListener((details) => {
+  let domain = extractRootDomain(details.url);
+  let filename = domain.split('.')[0]; // TODO: Need cleaner way to do this
+  console.log('google.com' in Plugins, Plugins);
+  // TODO: This doesn't work for suburls or non .com urls
+  if (!(filename + '.com' in Plugins)) {
+    return;
   }
 
+  chrome.tabs.executeScript({ file: filename + '.js' }, () => {
+    chrome.tabs.insertCSS(details.tabId, { file: filename + '.css' }, function() {
+    });
+    chrome.tabs.sendMessage(details.tabId, { loadShortcuts: true });
+  });
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.hasOwnProperty('url')) {
     initShortcuts(tab.url, null);
   }

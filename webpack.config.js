@@ -28,6 +28,9 @@ if (fileSystem.existsSync(secretsPath)) {
 
 var fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf", "woff", "woff2"];
 
+var plugins = ['google', 'messenger'];
+var extractCssPlugins = [];
+
 var options = {
   entry: {
     popup: path.join(__dirname, "chrome-extension", "js", "popup.js"),
@@ -35,7 +38,9 @@ var options = {
     background: path.join(__dirname, "chrome-extension", "js", "background.js"),
     init: path.join(__dirname, "chrome-extension", "js", "init.js"),
     plugins: path.join(__dirname, "chrome-extension", "js", "plugins.js"),
-    google: path.join(__dirname, "chrome-extension", "plugin", "google.ts"),
+    // TODO: Dynamically generate these
+    // google: path.join(__dirname, "chrome-extension", "plugin", "google.ts"),
+    // messenger: path.join(__dirname, "chrome-extension", "plugin", "messenger.ts"),
   },
 
   // All file outputs from webpack will be under the 'build/' directory.
@@ -46,24 +51,24 @@ var options = {
 
   module: {
     rules: [
-      {
-        // Bundles all imported CSS files into one file
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: {
-            loader: 'typings-for-css-modules-loader',
-            options: {
-              sourceMap: true,
-              importLoaders: 3,
-              modules: true,
-              namedExport: true,
-              camelCase: true
-            }
-          },
-        }),
-        exclude: /node_modules/
-      },
+      // {
+      //   // Bundles all imported CSS files into one file
+      //   test: /\.css$/,
+      //   use: ExtractTextPlugin.extract({
+      //     fallback: 'style-loader',
+      //     use: {
+      //       loader: 'typings-for-css-modules-loader',
+      //       options: {
+      //         sourceMap: true,
+      //         importLoaders: 3,
+      //         modules: true,
+      //         namedExport: true,
+      //         camelCase: true
+      //       }
+      //     },
+      //   }),
+      //   exclude: /node_modules/
+      // },
       {
         // Handles loading images
         test: new RegExp('\.(' + fileExtensions.join('|') + ')$'),
@@ -126,10 +131,37 @@ var options = {
       filename: "background.html",
       chunks: ["background"]
     }),
-    new ExtractTextPlugin('google.css'),
+    // new ExtractTextPlugin('google.css'),
     new WriteFilePlugin()
   ]
 };
+
+var cssConfig = {
+  fallback: 'style-loader',
+  use: {
+    loader: 'typings-for-css-modules-loader',
+    options: {
+      sourceMap: true,
+      importLoaders: 3,
+      modules: true,
+      namedExport: true,
+      camelCase: true
+    }
+  },
+};
+
+for (var i in plugins) {
+  let plugin = plugins[i];
+  console.log(plugin);
+  options.entry[plugin] = path.join(__dirname, "chrome-extension", "plugin", plugin + ".ts");
+  var extractCss = new ExtractTextPlugin(plugin + '.css');
+  options.module.rules.push({
+    test: new RegExp(plugin + '\\.css$', 'i'),
+    use: extractCss.extract(cssConfig),
+    exclude: /node_modules/
+  });
+  options.plugins.push(extractCss);
+}
 
 if (env.NODE_ENV === "development") {
   options.devtool = "cheap-module-eval-source-map";

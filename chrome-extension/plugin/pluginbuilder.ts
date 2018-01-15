@@ -35,6 +35,7 @@ export class Plugin {
   init() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.loadShortcuts) {
+        console.log('wtf');
         for (let s of this.shortcuts) {
           console.log(s.shortcut);
           key(s.shortcut.join(', '), (event, handler) => {
