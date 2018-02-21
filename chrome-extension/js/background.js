@@ -8,7 +8,7 @@ const URL_PATH = 'https://raw.githubusercontent.com/UseMacro/macro-data/master/c
 const FILE_EXT = '.json'
 
 function getCurrentTab(callback) {
-  var queryInfo = {
+  let queryInfo = {
     active: true,
     currentWindow: true
   };
@@ -30,7 +30,7 @@ function get(key, callback) {
 }
 
 function save(key, value) {
-  var items = {};
+  let items = {};
   items[key] = value;
   chrome.storage.sync.set(items);
 }
@@ -38,7 +38,7 @@ function save(key, value) {
 // Copied function from: https://stackoverflow.com/a/23945027
   //find & remove protocol (http, ftp, etc.) and get hostname
 function extractHostname(url) {
-  var hostname;
+  let hostname;
   if (url.indexOf('://') > -1) {
     hostname = url.split('/')[2];
   } else {
@@ -53,7 +53,7 @@ function extractHostname(url) {
 
 // Copied function from: https://stackoverflow.com/a/23945027
 function extractRootDomain(url) {
-  var domain = extractHostname(url),
+  let domain = extractHostname(url),
   splitArr = domain.split('.'),
   arrLen = splitArr.length;
 
@@ -69,59 +69,76 @@ function extractRootDomain(url) {
   return domain;
 }
 
-function getKey(url) {
-  var domain = extractRootDomain(url);
+function getDomainKey(url) {
+  let domain = extractRootDomain(url);
   return URL_PATH.concat(domain, FILE_EXT);
 }
 
+// should always call callback: if shortcut data doesn't exist, panel should
+// still attempt to render (plugins may exist, vice versa)
 function getShortcutData(key, callback) {
-  var xhr = new XMLHttpRequest();
+  let xhr = new XMLHttpRequest();
   xhr.open('GET', key, true);
   xhr.onload = (e) => {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        var json = JSON.parse(xhr.responseText);
+        let json = JSON.parse(xhr.responseText);
         callback(json);
       } else {
+        callback({sections: []});
         console.error(xhr.statusText);
       }
     }
   };
   xhr.onerror = (e) => {
+    callback({sections: []});
     console.error(xhr.statusText);
   };
   xhr.send(null);
 }
 
+// Simply adds plugin section to shortcuts.sections
+// assumption: this is only called when plugins were fetched successfully
 function mergeData(shortcuts, plugins) {
-  var sections = shortcuts.sections;
-  for (var i = 0; i < plugins.length; i++) {
-    for (var j = 0; j < sections.length; j++) {
-      var plugin = plugins[i];
-      var section = sections[j];
-      var shortcut = {
-        name: plugin.name,
-        description: plugin.description,
-        keys: plugin.keys
-      };
-      if (plugin.section == section.name) {
-        section.shortcuts.push(shortcut);
-        break;
-      } else if (j == sections.length - 1) {
-        sections.push({name: plugin.section, description: '', shortcuts: [shortcut]});
-        break;
-      }
-    }
-  }
+  let pluginSection = {name: 'Plugins', description: 'Shortcuts from plugins', shortcuts: []}
+  pluginSection.shortcuts = plugins.map(plugin => {
+    return {
+      name: plugin.name,
+      keys: plugin.keys
+    };
+  });
+  shortcuts.sections.push(pluginSection);
   return shortcuts;
+
+  // TODO: deprecate? Need to implement developer defined shortcut sections
+  // before using this.
+  // var sections = shortcuts.sections;
+  // for (var i = 0; i < plugins.length; i++) {
+  //   for (var j = 0; j < sections.length; j++) {
+  //     var plugin = plugins[i];
+  //     var section = sections[j];
+  //     var shortcut = {
+  //       name: plugin.name,
+  //       keys: plugin.keys
+  //     };
+  //     if (plugin.section === section.name) {
+  //       section.shortcuts.push(shortcut);
+  //       break;
+  //     } else if (j === sections.length - 1) {
+  //       sections.push({name: plugin.section, description: '', shortcuts: [shortcut]});
+  //       break;
+  //     }
+  //   }
+  // }
+  // return shortcuts;
 }
 
-function initPlugins(plugins) {
+function initPlugin(plugin) {
   data = [];
-  plugins.forEach((plugin) => {
+  plugin.forEach((shortcut) => {
     data.push({
-      keys: plugin.keys,
-      action: plugin.action.toString()
+      keys: shortcut.keys,
+      action: shortcut.action.toString()
     });
   });
   chrome.tabs.executeScript({ code: 'var plugins = ' + JSON.stringify(data) + ';' }, () => {
@@ -129,15 +146,28 @@ function initPlugins(plugins) {
   });
 }
 
-function initShortcuts(url, callback) {
-  var domain = extractRootDomain(url);
-  getPlugins(domain, (plugins) => {
-    var key = getKey(url);
-    getShortcutData(key, (shortcuts) => {
-      var data = mergeData(shortcuts, plugins.listShortcuts());
-      save(key, data);
-    });
-    initPlugins(plugins);
+function initShortcuts(url, render) {
+  let domain = extractRootDomain(url);
+  // TODO: support selecting one plugin from multiple per domain (use param?)
+  // TODO: combine success and failure handler by ensuring getPlugin ALWAYS returns a plugin object
+  getPlugin(domain,
+    // success handler: if got plugins, merge MD shortcuts with plugins, cache & render
+    (plugin) => {
+      let domainKey = getDomainKey(url);
+      getShortcutData(domainKey, (shortcuts) => {
+        let data = mergeData(shortcuts, plugin.default.shortcuts);
+        save(domainKey, data);
+        render(data);
+      });
+      initPlugin(plugin);
+    },
+    // failure handler: if no plugins, use MD shortcuts, cache & render
+    () => {
+      let domainKey = getDomainKey(url);
+      getShortcutData(domainKey, (shortcuts) => {
+        save(domainKey, shortcuts);
+        render(shortcuts);
+      });
   });
 }
 
@@ -154,11 +184,11 @@ function isEmpty(obj) {
 chrome.commands.onCommand.addListener((command) => {
   if (command == 'toggle-popup') {
     getCurrentTabUrl((url) => {
-      var key = getKey(url)
+      let key = getDomainKey(url);
         get(key, (data) => {
           if (isEmpty(data)) {
-            initShortcuts(url, (data) => {
-              togglePopup(data);
+            initShortcuts(url, (shortcutData) => {
+              togglePopup(shortcutData);
             });
           } else {
             togglePopup(data);
@@ -190,50 +220,51 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
-function getPlugins(domain, callback) {
-  let plugin = Plugins[domain];
-  if (!plugin) { return; }
-
-  callback(plugin);
-
-  // TODO (Chris): Update to make it generic
-  if (domain === 'github.com') {
-    callback(getGithubPlugins());
-  } else {
-    callback([]);
-  }
+// currently supports 1 plugin per domain
+function getPlugin(domain, success, failure) {
+  domain in Plugins ? success(Plugins[domain]) : failure();
+//   let plugin = Plugins[domain];
+//   if (!plugin) { failure(); }
+//   success(plugin);
+//
+//   // TODO (Chris): Update to make it generic
+//   if (domain === 'github.com') {
+//     success(getGithubPlugins());
+//   } else {
+//     callback([]);
+//   }
 }
 
-function getGithubPlugins() {
-  return [
-    {
-      section: 'Navigation',
-      name: 'test plugin',
-      description: 'custom plugin for github',
-      keys:
-      [{
-        "windows": ["cmd", "up"],
-        "default": ["cmd", "up"],
-        "macos": ["cmd", "up"]
-      }],
-      action: () => {
-        alert('Test plugin');
-      }
-    },
-    {
-      section: 'Test Section',
-      name: 'test plugin',
-      description: 'custom plugin for github',
-      keys:
-      [{
-        "windows": ["k"],
-        "default": ["k"],
-        "macos": ["k"]
-      }],
-      action: () => {
-        alert('New section plugin');
-      }
-    }
-  ];
-}
-
+//****** Not using this since it does not return a Plugin object (required: Plugin.listShortcuts)
+// function getGithubPlugins() {
+//   return [
+//     {
+//       section: 'Navigation',
+//       name: 'test plugin',
+//       description: 'custom plugin for github',
+//       keys:
+//       [{
+//         "windows": ["cmd", "up"],
+//         "default": ["cmd", "up"],
+//         "macos": ["cmd", "up"]
+//       }],
+//       action: () => {
+//         alert('Test plugin');
+//       }
+//     },
+//     {
+//       section: 'Test Section',
+//       name: 'test plugin',
+//       description: 'custom plugin for github',
+//       keys:
+//       [{
+//         "windows": ["k"],
+//         "default": ["k"],
+//         "macos": ["k"]
+//       }],
+//       action: () => {
+//         alert('New section plugin');
+//       }
+//     }
+//   ];
+// }
