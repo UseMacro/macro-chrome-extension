@@ -36,7 +36,7 @@ function save(key, value) {
 }
 
 // Copied function from: https://stackoverflow.com/a/23945027
-  //find & remove protocol (http, ftp, etc.) and get hostname
+// find & remove protocol (http, ftp, etc.) and get hostname
 function extractHostname(url) {
   let hostname;
   if (url.indexOf('://') > -1) {
@@ -109,28 +109,6 @@ function mergeData(shortcuts, plugins) {
   });
   shortcuts.sections.push(pluginSection);
   return shortcuts;
-
-  // TODO: deprecate? Need to implement developer defined shortcut sections
-  // before using this.
-  // var sections = shortcuts.sections;
-  // for (var i = 0; i < plugins.length; i++) {
-  //   for (var j = 0; j < sections.length; j++) {
-  //     var plugin = plugins[i];
-  //     var section = sections[j];
-  //     var shortcut = {
-  //       name: plugin.name,
-  //       keys: plugin.keys
-  //     };
-  //     if (plugin.section === section.name) {
-  //       section.shortcuts.push(shortcut);
-  //       break;
-  //     } else if (j === sections.length - 1) {
-  //       sections.push({name: plugin.section, description: '', shortcuts: [shortcut]});
-  //       break;
-  //     }
-  //   }
-  // }
-  // return shortcuts;
 }
 
 function initPlugin(plugin) {
@@ -149,7 +127,6 @@ function initPlugin(plugin) {
 function initShortcuts(url, render) {
   let domain = extractRootDomain(url);
   // TODO: support selecting one plugin from multiple per domain (use param?)
-  // TODO: combine success and failure handler by ensuring getPlugin ALWAYS returns a plugin object
   getPlugin(domain,
     // success handler: if got plugins, merge MD shortcuts with plugins, cache & render
     (plugin) => {
@@ -223,48 +200,4 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // currently supports 1 plugin per domain
 function getPlugin(domain, success, failure) {
   domain in Plugins ? success(Plugins[domain]) : failure();
-//   let plugin = Plugins[domain];
-//   if (!plugin) { failure(); }
-//   success(plugin);
-//
-//   // TODO (Chris): Update to make it generic
-//   if (domain === 'github.com') {
-//     success(getGithubPlugins());
-//   } else {
-//     callback([]);
-//   }
 }
-
-//****** Not using this since it does not return a Plugin object (required: Plugin.listShortcuts)
-// function getGithubPlugins() {
-//   return [
-//     {
-//       section: 'Navigation',
-//       name: 'test plugin',
-//       description: 'custom plugin for github',
-//       keys:
-//       [{
-//         "windows": ["cmd", "up"],
-//         "default": ["cmd", "up"],
-//         "macos": ["cmd", "up"]
-//       }],
-//       action: () => {
-//         alert('Test plugin');
-//       }
-//     },
-//     {
-//       section: 'Test Section',
-//       name: 'test plugin',
-//       description: 'custom plugin for github',
-//       keys:
-//       [{
-//         "windows": ["k"],
-//         "default": ["k"],
-//         "macos": ["k"]
-//       }],
-//       action: () => {
-//         alert('New section plugin');
-//       }
-//     }
-//   ];
-// }
