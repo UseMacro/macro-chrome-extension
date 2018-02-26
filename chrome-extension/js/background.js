@@ -110,7 +110,6 @@ function mergeData(shortcuts, plugins) {
   return shortcuts;
 }
 
-// TODO: test
 function initPlugin(plugin) {
   data = [];
   plugin.default.getShortcutsMDS().forEach((shortcut) => {
@@ -161,7 +160,7 @@ function isEmpty(obj) {
 }
 
 chrome.commands.onCommand.addListener((command) => {
-  if (command == 'toggle-popup') {
+  if (command === 'toggle-popup') {
     getCurrentTabUrl((url) => {
       let key = getDomainKey(url);
         get(key, (data) => {
