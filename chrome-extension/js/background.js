@@ -142,17 +142,17 @@ function initShortcuts(url, renderPanel) {
       let domainKey = getDomainKey(url);
       getShortcutData(domainKey, (shortcuts) => {
         save(domainKey, shortcuts);
-        if (shortcuts.sections.length > 0) {
-          renderPanel(shortcuts);
-        }
+        renderPanel(shortcuts);
       });
   });
 }
 
 function togglePopup(data) {
-  chrome.tabs.executeScript({ code: 'var data = ' + JSON.stringify(data) + ';' }, () => {
-    chrome.tabs.executeScript({ file: 'init.js' })
-  });
+  if (data.sections.length > 0) {
+    chrome.tabs.executeScript({ code: 'var data = ' + JSON.stringify(data) + ';' }, () => {
+      chrome.tabs.executeScript({ file: 'init.js' })
+    });
+  }
 }
 
 function isEmpty(obj) {
