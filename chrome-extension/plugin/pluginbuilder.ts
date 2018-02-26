@@ -20,14 +20,16 @@ class PluginState {
   }
 }
 
+// Plugin manages a set of keyboard shortcuts for a domain
+// Note: stores shortcuts in DS
 export class Plugin {
   domain: string;
-  shortcuts: any[]; // MDS
+  shortcuts: any[]; // DS
   pluginState: any;
 
   constructor(domain: string, shortcuts: any[], state: any) {
     this.domain = domain;
-    this.shortcuts = shortcuts;
+    this.shortcuts = shortcuts; // DS
     this.pluginState = new PluginState(state);
     this.init();
   }
@@ -44,6 +46,18 @@ export class Plugin {
     });
   }
 
+  // MDS getter for frontend
+  // returns a list of shortcut objects in MDS
+  getShortcutsMDS() : object[] {
+    return this.shortcuts.map(s => {
+      let MDS = s.keys.map(key => { return {default: [key]}; });
+      return {
+        name: s.name,
+        keys: MDS
+      };
+    });
+  }
+
   listShortcuts() : any[] {
     // Only include name and keys
     return this.shortcuts.map((s) => {
@@ -54,11 +68,13 @@ export class Plugin {
     });
   }
 
-  getShortcut(name: string) : any {
-    return this.shortcuts[name];
-  }
+  // getShortcut(name: string) : any {
+  //   return this.shortcuts[name];
+  // }
 }
 
+// Provides an API for third party developers to create customs plugins for a domain
+// Note: PluginBuilder only handles shortcuts defined in developer schema (DS)
 export class PluginBuilder {
   domain: string;
   // PluginBuilder requires shortcuts to be in DS
@@ -71,7 +87,6 @@ export class PluginBuilder {
   }
 
   // TODO: Handle scopes from keymaster
-  // transforms shortcuts from developer schema (DS) to macro-data schema (MDS)
   registerShortcut(name: string,
                    keys: string | string[],
                    action: Function) : void {
@@ -84,11 +99,11 @@ export class PluginBuilder {
     }
 
     let config = {
-      keys: [{default: keys}], // DS to MDS
+      keys: keys,
       action: action
     }
 
-    this.validateConfig(config)
+    this.validateConfig(config);
     this.shortcuts[name] = config;
   }
 
@@ -99,15 +114,13 @@ export class PluginBuilder {
 
   validateConfig(config: any) : boolean {
     // Structure: {
-    //   'keys': [{default: [string]}],
+    //   'keys': string[],
     //   'action': <function Function>
     // }
 
     // Validate keys
     if (config.keys.constructor !== Array) {
       throw 'Invalid or missing keys';
-    } else if (!('default' in config.keys[0])) {
-      throw 'Invalid keys object';
     }
 
     // Validate action

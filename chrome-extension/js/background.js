@@ -74,9 +74,10 @@ function getDomainKey(url) {
   return URL_PATH.concat(domain, FILE_EXT);
 }
 
-// should always call callback: if shortcut data doesn't exist, panel should
-// still attempt to render (plugins may exist, vice versa)
+// always calls callback: shortcuts missing from MD should not interrupt flow
+// since plugins may exist
 function getShortcutData(key, callback) {
+  let dummy = {name: 'Shortcuts', sections: []};
   let xhr = new XMLHttpRequest();
   xhr.open('GET', key, true);
   xhr.onload = (e) => {
@@ -85,35 +86,34 @@ function getShortcutData(key, callback) {
         let json = JSON.parse(xhr.responseText);
         callback(json);
       } else {
-        callback({sections: []});
+        callback(dummy);
         console.error(xhr.statusText);
       }
     }
   };
   xhr.onerror = (e) => {
-    callback({sections: []});
+    callback(dummy);
     console.error(xhr.statusText);
   };
   xhr.send(null);
 }
 
-// Simply adds plugin section to shortcuts.sections
-// assumption: this is only called when plugins were fetched successfully
+// Adds a plugin section to shortcuts.sections
+// only called when plugins were fetched successfully
 function mergeData(shortcuts, plugins) {
-  let pluginSection = {name: 'Plugins', description: 'Shortcuts from plugins', shortcuts: []}
-  pluginSection.shortcuts = plugins.map(plugin => {
-    return {
-      name: plugin.name,
-      keys: plugin.keys
-    };
-  });
+  let pluginSection = {
+    name: 'Plugins',
+    description: 'Shortcuts from plugins',
+    shortcuts: plugins
+  };
   shortcuts.sections.push(pluginSection);
   return shortcuts;
 }
 
+// TODO: test
 function initPlugin(plugin) {
   data = [];
-  plugin.forEach((shortcut) => {
+  plugin.default.getShortcutsMDS().forEach((shortcut) => {
     data.push({
       keys: shortcut.keys,
       action: shortcut.action.toString()
@@ -124,7 +124,7 @@ function initPlugin(plugin) {
   });
 }
 
-function initShortcuts(url, render) {
+function initShortcuts(url, renderPanel) {
   let domain = extractRootDomain(url);
   // TODO: support selecting one plugin from multiple per domain (use param?)
   getPlugin(domain,
@@ -132,9 +132,9 @@ function initShortcuts(url, render) {
     (plugin) => {
       let domainKey = getDomainKey(url);
       getShortcutData(domainKey, (shortcuts) => {
-        let data = mergeData(shortcuts, plugin.default.shortcuts);
+        let data = mergeData(shortcuts, plugin.default.getShortcutsMDS());
         save(domainKey, data);
-        render(data);
+        renderPanel(data);
       });
       initPlugin(plugin);
     },
@@ -143,7 +143,9 @@ function initShortcuts(url, render) {
       let domainKey = getDomainKey(url);
       getShortcutData(domainKey, (shortcuts) => {
         save(domainKey, shortcuts);
-        render(shortcuts);
+        if (shortcuts.sections.length > 0) {
+          renderPanel(shortcuts);
+        }
       });
   });
 }
@@ -193,7 +195,7 @@ chrome.webNavigation.onCompleted.addListener((details) => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.hasOwnProperty('url')) {
-    initShortcuts(tab.url, null);
+    initShortcuts(tab.url, () => {});
   }
 });
 
