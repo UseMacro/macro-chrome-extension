@@ -22,7 +22,7 @@ class MessengerPage {
   }
 
   getUnreadLinks() : HTMLAnchorElement[] {
-    return document.querySelectorAll('li[aria-relevant="additions text"][aria-live="polite"]');
+    return Array.prototype.slice.call(document.querySelectorAll('li[aria-relevant="additions text"][aria-live="polite"]'));
   }
 
   getNextUnreadLink() : HTMLAnchorElement {
