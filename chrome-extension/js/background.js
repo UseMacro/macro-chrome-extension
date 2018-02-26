@@ -111,7 +111,7 @@ function mergeData(shortcuts, plugins) {
 }
 
 function initPlugin(plugin) {
-  data = [];
+  let data = [];
   plugin.default.getShortcutsMDS().forEach((shortcut) => {
     data.push({
       keys: shortcut.keys,
