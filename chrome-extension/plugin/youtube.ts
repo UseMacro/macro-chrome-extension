@@ -38,7 +38,8 @@ let shortcuts = {
 ///////////////////////////////////////
 let pb = new PluginBuilder();
 
-pb.setDomainName('youtube.com');
+pb.setPluginName('youtube');
+pb.addDomainName('youtube.com');
 pb.setInitialState({
   higlightedIndex: -1
 });

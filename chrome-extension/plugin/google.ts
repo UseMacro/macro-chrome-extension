@@ -83,7 +83,11 @@ let shortcuts = {
 
 let pb = new PluginBuilder();
 
-pb.setDomainName('google.com');
+pb.setPluginName('google');
+
+pb.addDomainName('google.com');
+pb.addDomainName('google.ca');
+
 pb.setInitialState({
   linkIndex: 0
 });
