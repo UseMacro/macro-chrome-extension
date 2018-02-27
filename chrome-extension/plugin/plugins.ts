@@ -1,7 +1,6 @@
 import * as Google from './google.ts';
 import * as Messenger from './messenger.ts';
 import * as Youtube from './youtube.ts';
-import { Plugin } from './pluginbuilder.ts';
 
 let plugins = [Google, Messenger, Youtube];
 let domainToPlugin = {};
