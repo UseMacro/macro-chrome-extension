@@ -69,6 +69,14 @@ class MessengerPage {
   getMessageInputElement() {
     return document.querySelector('div[aria-label="Type a message..."]');
   }
+
+  getComposeMessageElement() {
+    return document.querySelector('a[aria-label="New Message"]');
+  }
+
+  getSearchConversationElement() {
+    return document.querySelector('._3szn._3szo ._5odt');
+  }
 }
 
 let page = new MessengerPage();
@@ -78,9 +86,11 @@ let shortcuts = {
   nextUnreadRow: 'option+shift+j',
   previousUnreadRow: 'option+shift+k',
   sendEmoji: 'command+enter',
-  toggleInfo: 'command+\\',
-  searchMessenger: 'command+\/',
-  messageInput: 'command+.',
+  toggleInfo: 'option+\\',
+  searchMessenger: 'option+\/',
+  messageInput: 'escape',
+  composeMessage: 'option+c',
+  searchConversation: 'option+f'
 };
 
 ///////////////////////////////////////
@@ -114,9 +124,13 @@ pb.registerShortcut('Previous unread chat', shortcuts.previousUnreadRow, (event,
 });
 
 function triggerMouseEvent(node, eventType) {
-  let clickEvent = document.createEvent('MouseEvents');
-  clickEvent.initEvent(eventType, true, true);
-  node.dispatchEvent(clickEvent);
+  if (node.fireEvent) {
+    node.fireEvent('on' + event);
+  } else {
+    let clickEvent = document.createEvent('MouseEvents');
+    clickEvent.initEvent(eventType, true, true);
+    node.dispatchEvent(clickEvent);
+  }
 }
 
 pb.registerShortcut('Send emoji', shortcuts.sendEmoji, (event, state) => {
@@ -137,8 +151,20 @@ pb.registerShortcut('Search Messenger', shortcuts.searchMessenger, (event, state
   event.stopPropagation();
 });
 
+pb.registerShortcut('Search Conversation', shortcuts.searchConversation, (event, state) => {
+  triggerMouseEvent(page.getSearchConversationElement(), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+});
+
 pb.registerShortcut('Focus on message input', shortcuts.messageInput, (event, state) => {
   triggerMouseEvent(page.getMessageInputElement(), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+});
+
+pb.registerShortcut('Compose new message', shortcuts.composeMessage, (event, state) => {
+  triggerMouseEvent(page.getComposeMessageElement(), 'click');
   event.preventDefault();
   event.stopPropagation();
 });
