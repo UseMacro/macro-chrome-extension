@@ -65,6 +65,10 @@ class MessengerPage {
   getSearchMessengerElement() {
     return document.querySelector('div[role=banner] ~ div label');
   }
+
+  getMessageInputElement() {
+    return document.querySelector('div[aria-label="Type a message..."]');
+  }
 }
 
 let page = new MessengerPage();
@@ -76,6 +80,7 @@ let shortcuts = {
   sendEmoji: 'command+enter',
   toggleInfo: 'command+\\',
   searchMessenger: 'command+\/',
+  messageInput: 'command+.',
 };
 
 ///////////////////////////////////////
@@ -128,6 +133,12 @@ pb.registerShortcut('Toggle Conversation Information', shortcuts.toggleInfo, (ev
 
 pb.registerShortcut('Search Messenger', shortcuts.searchMessenger, (event, state) => {
   triggerMouseEvent(page.getSearchMessengerElement(), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+});
+
+pb.registerShortcut('Focus on message input', shortcuts.messageInput, (event, state) => {
+  triggerMouseEvent(page.getMessageInputElement(), 'click');
   event.preventDefault();
   event.stopPropagation();
 });
