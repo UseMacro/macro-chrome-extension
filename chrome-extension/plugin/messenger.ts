@@ -53,6 +53,14 @@ class MessengerPage {
   getActiveRowIndex() {
     return Array.prototype.indexOf.call(this.getRows(), this.getActiveRow());
   }
+
+  getEmojiElement() {
+    return document.querySelector('a[aria-label="Send a Like"]');
+  }
+
+  getConversationInfo() {
+    return document.querySelector('a[aria-label="Conversation Information"]');
+  }
 }
 
 let page = new MessengerPage();
@@ -60,7 +68,9 @@ let shortcuts = {
   nextRow: 'option+j',
   previousRow: 'option+k',
   nextUnreadRow: 'option+shift+j',
-  previousUnreadRow: 'option+shift+k'
+  previousUnreadRow: 'option+shift+k',
+  sendEmoji: 'command+enter',
+  toggleInfo: 'command+\\',
 };
 
 ///////////////////////////////////////
@@ -89,6 +99,24 @@ pb.registerShortcut('Next unread chat', shortcuts.nextUnreadRow, (event, state) 
 
 pb.registerShortcut('Previous unread chat', shortcuts.previousUnreadRow, (event, state) => {
   page.getPreviousUnreadLink().click();
+  event.preventDefault();
+  event.stopPropagation();
+});
+
+function triggerMouseEvent(node, eventType) {
+  let clickEvent = document.createEvent('MouseEvents');
+  clickEvent.initEvent(eventType, true, true);
+  node.dispatchEvent(clickEvent);
+}
+
+pb.registerShortcut('Send emoji', shortcuts.sendEmoji, (event, state) => {
+  triggerMouseEvent(page.getEmojiElement(), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+});
+
+pb.registerShortcut('Toggle Conversation Information', shortcuts.toggleInfo, (event, state) => {
+  triggerMouseEvent(page.getConversationInfo(), 'click');
   event.preventDefault();
   event.stopPropagation();
 });
