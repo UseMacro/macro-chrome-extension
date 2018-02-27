@@ -86,7 +86,8 @@ let shortcuts = {
 ///////////////////////////////////////
 let pb = new PluginBuilder();
 
-pb.setDomainName('messenger.com');
+pb.setPluginName('messenger');
+pb.addDomainName('messenger.com');
 pb.setInitialState({});
 
 pb.registerShortcut('Next chat', shortcuts.nextRow, (event, state) => {

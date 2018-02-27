@@ -1,5 +1,7 @@
 import * as key from 'keymaster';
 
+const DOMAIN_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+
 class PluginState {
   state: any;
 
@@ -20,15 +22,17 @@ class PluginState {
   }
 }
 
-// Plugin manages a set of keyboard shortcuts for a domain
+// Plugin manages a set of keyboard shortcuts for a set of domain
 // Note: stores shortcuts in DS
 export class Plugin {
-  domain: string;
+  pluginName: string; // Should be the same as the filename
+  domains: string[];
   shortcuts: any[]; // DS
   pluginState: any;
 
-  constructor(domain: string, shortcuts: any[], state: any) {
-    this.domain = domain;
+  constructor(pluginName: string, domains: string[], shortcuts: any[], state: any) {
+    this.pluginName = pluginName;
+    this.domains = domains;
     this.shortcuts = shortcuts; // DS
     this.pluginState = new PluginState(state);
     this.init();
@@ -73,10 +77,11 @@ export class Plugin {
   // }
 }
 
-// Provides an API for third party developers to create customs plugins for a domain
+// Provides an API for third party developers to create customs plugins for a set of domains
 // Note: PluginBuilder only handles shortcuts defined in developer schema (DS)
 export class PluginBuilder {
-  domain: string;
+  pluginName: string;
+  domains: string[];
   // PluginBuilder requires shortcuts to be in DS
   shortcuts: any;
   state: any;
@@ -84,6 +89,7 @@ export class PluginBuilder {
   constructor() {
     this.shortcuts = {};
     this.state = {};
+    this.domains = [];
   }
 
   // TODO: Handle scopes from keymaster
@@ -107,9 +113,15 @@ export class PluginBuilder {
     this.shortcuts[name] = config;
   }
 
-  setDomainName(domainName: string) : void {
-    // TODO: Validate domain name
-    this.domain = domainName;
+  setPluginName(pluginName: string) : void {
+    this.pluginName = pluginName;
+  }
+
+  addDomainName(domainName: string) : void {
+    if (!DOMAIN_REGEX.test(domainName)) {
+      throw 'Not a valid domain';
+    }
+    this.domains.push(domainName);
   }
 
   validateConfig(config: any) : boolean {
@@ -136,8 +148,12 @@ export class PluginBuilder {
   }
 
   build() : Plugin {
-    if (!this.domain) {
-      throw 'Domain name is missing';
+    if (!this.pluginName) {
+      throw 'Plugin name is missing'
+    }
+
+    if (this.domains.length === 0) {
+      throw 'Domain name is missing for plugin: ' + this.pluginName;
     }
 
     if (Object.keys(this.shortcuts).length === 0) {
@@ -153,6 +169,6 @@ export class PluginBuilder {
       });
     }
 
-    return new Plugin(this.domain, shortcuts, this.state);
+    return new Plugin(this.pluginName, this.domains, shortcuts, this.state);
   }
 }
