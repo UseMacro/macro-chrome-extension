@@ -7,14 +7,11 @@ class GooglePage {
   links: HTMLElement[];
   nextPage: HTMLAnchorElement;
   prevPage: HTMLAnchorElement;
-  searchInput: HTMLElement;
-
 
   constructor() {
     this.links = Array.prototype.slice.call(document.querySelectorAll('h3.r a'));
     this.nextPage = document.querySelector('#pnnext');
     this.prevPage = document.querySelector('#pnprev');
-    this.searchInput = document.getElementById('lst-ib');
   }
 
   getLink(index: number) {
@@ -37,6 +34,11 @@ class GooglePage {
 //////////////////////
 // Helper functions //
 //////////////////////
+
+function getSearchInput() {
+  return document.getElementById('lst-ib');
+}
+
 function getLink(page, index) {
   return page.getLink(index);
 }
@@ -70,9 +72,11 @@ let page = new GooglePage();
 let shortcuts = {
   nextLink: 'j',
   previousLink: 'k',
+  clickLink: 'enter',
   nextPage: 'l',
   previousPage: 'h',
-  focusSearchInput: '/'
+  focusSearchInput: '/',
+  highlightSearchInput: 'command+/'
 };
 
 ///////////////////////
@@ -106,6 +110,18 @@ pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
   updateFocusedLink(state.linkIndex);
 });
 
+function triggerMouseEvent(node, eventType) {
+  let clickEvent = document.createEvent('MouseEvents');
+  clickEvent.initEvent(eventType, true, true);
+  node.dispatchEvent(clickEvent);
+}
+
+pb.registerShortcut('Click link', shortcuts.clickLink, (event, state) => {
+  triggerMouseEvent(getLink(page, state.linkIndex), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+});
+
 pb.registerShortcut('Next page', shortcuts.nextPage, (event, state) => {
   let nextPage = page.getNextPage();
   if (!nextPage) {
@@ -122,6 +138,31 @@ pb.registerShortcut('Previous page', shortcuts.previousPage, (event, state) => {
   }
 
   location.href = prevPage.href;
+});
+
+pb.registerShortcut('Focus on Search Input', shortcuts.focusSearchInput, (event, state) => {
+  let searchInput = getSearchInput();
+  searchInput.focus();
+  event.preventDefault();
+  event.stopPropagation();
+
+  // Always move cursor to the back
+  // @ts-ignore
+  let val = searchInput.value;
+  // @ts-ignore
+  searchInput.value = '';
+  // @ts-ignore
+  searchInput.value = val;
+});
+
+pb.registerShortcut('Highlight Search Input', shortcuts.highlightSearchInput, (event, state) => {
+  let searchInput = getSearchInput();
+  searchInput.focus();
+  event.preventDefault();
+  event.stopPropagation();
+
+  // @ts-ignore
+  searchInput.setSelectionRange(0, searchInput.value.length);
 });
 
 let plugin = pb.build();
