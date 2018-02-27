@@ -7,14 +7,11 @@ class GooglePage {
   links: HTMLElement[];
   nextPage: HTMLAnchorElement;
   prevPage: HTMLAnchorElement;
-  searchInput: HTMLElement;
-
 
   constructor() {
     this.links = Array.prototype.slice.call(document.querySelectorAll('h3.r a'));
     this.nextPage = document.querySelector('#pnnext');
     this.prevPage = document.querySelector('#pnprev');
-    this.searchInput = document.getElementById('lst-ib');
   }
 
   getLink(index: number) {
@@ -37,6 +34,11 @@ class GooglePage {
 //////////////////////
 // Helper functions //
 //////////////////////
+
+function getSearchInput() {
+  return document.getElementById('lst-ib');
+}
+
 function getLink(page, index) {
   return page.getLink(index);
 }
@@ -55,9 +57,11 @@ function updateFocusedLink(index) {
   }
 }
 
-function clearHighlight(page, index) {
-  let link = getLink(page, index);
-  link.classList.remove(styles.test);
+function clearHighlights(page) {
+  for (let i = 0; i < page.getLinkCount(); i++) {
+    let link = getLink(page, i);
+    link.classList.remove(styles.test);
+  }
 }
 
 //////////////////////
@@ -68,9 +72,11 @@ let page = new GooglePage();
 let shortcuts = {
   nextLink: 'j',
   previousLink: 'k',
+  clickLink: 'enter',
   nextPage: 'l',
   previousPage: 'h',
-  focusSearchInput: '/'
+  focusSearchInput: '/',
+  highlightSearchInput: 'command+/'
 };
 
 ///////////////////////
@@ -88,7 +94,7 @@ pb.setInitialState({
 
 pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
   // Clear existing classes
-  clearHighlight(page, state.linkIndex);
+  clearHighlights(page);
 
   let nextIndex = Math.min(state.linkIndex + 1, page.getLinkCount() - 1);
   state.set({ linkIndex: nextIndex });
@@ -99,13 +105,25 @@ pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
 
 pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
   // Clear existing classes
-  clearHighlight(page, state.linkIndex);
+  clearHighlights(page);
 
   let prevIndex = Math.max(state.linkIndex - 1, 0);
   state.set({ linkIndex: prevIndex });
 
   // Update which link is focused
   updateFocusedLink(state.linkIndex);
+});
+
+function triggerMouseEvent(node, eventType) {
+  let clickEvent = document.createEvent('MouseEvents');
+  clickEvent.initEvent(eventType, true, true);
+  node.dispatchEvent(clickEvent);
+}
+
+pb.registerShortcut('Click link', shortcuts.clickLink, (event, state) => {
+  triggerMouseEvent(getLink(page, state.linkIndex), 'click');
+  event.preventDefault();
+  event.stopPropagation();
 });
 
 pb.registerShortcut('Next page', shortcuts.nextPage, (event, state) => {
@@ -124,6 +142,31 @@ pb.registerShortcut('Previous page', shortcuts.previousPage, (event, state) => {
   }
 
   location.href = prevPage.href;
+});
+
+pb.registerShortcut('Focus on Search Input', shortcuts.focusSearchInput, (event, state) => {
+  let searchInput = getSearchInput();
+  searchInput.focus();
+  event.preventDefault();
+  event.stopPropagation();
+
+  // Always move cursor to the back
+  // @ts-ignore
+  let val = searchInput.value;
+  // @ts-ignore
+  searchInput.value = '';
+  // @ts-ignore
+  searchInput.value = val;
+});
+
+pb.registerShortcut('Highlight Search Input', shortcuts.highlightSearchInput, (event, state) => {
+  let searchInput = getSearchInput();
+  searchInput.focus();
+  event.preventDefault();
+  event.stopPropagation();
+
+  // @ts-ignore
+  searchInput.setSelectionRange(0, searchInput.value.length);
 });
 
 let plugin = pb.build();
