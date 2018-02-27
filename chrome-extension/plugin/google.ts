@@ -55,9 +55,11 @@ function updateFocusedLink(index) {
   }
 }
 
-function clearHighlight(page, index) {
-  let link = getLink(page, index);
-  link.classList.remove(styles.test);
+function clearHighlights(page) {
+  for (let i = 0; i < page.getLinkCount(); i++) {
+    let link = getLink(page, i);
+    link.classList.remove(styles.test);
+  }
 }
 
 //////////////////////
@@ -84,7 +86,7 @@ pb.setInitialState({
 
 pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
   // Clear existing classes
-  clearHighlight(page, state.linkIndex);
+  clearHighlights(page);
 
   let nextIndex = Math.min(state.linkIndex + 1, page.getLinkCount() - 1);
   state.set({ linkIndex: nextIndex });
@@ -95,7 +97,7 @@ pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
 
 pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
   // Clear existing classes
-  clearHighlight(page, state.linkIndex);
+  clearHighlights(page);
 
   let prevIndex = Math.max(state.linkIndex - 1, 0);
   state.set({ linkIndex: prevIndex });
