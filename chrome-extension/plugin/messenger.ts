@@ -61,6 +61,10 @@ class MessengerPage {
   getConversationInfo() {
     return document.querySelector('a[aria-label="Conversation Information"]');
   }
+
+  getSearchMessengerElement() {
+    return document.querySelector('div[role=banner] ~ div label');
+  }
 }
 
 let page = new MessengerPage();
@@ -71,6 +75,7 @@ let shortcuts = {
   previousUnreadRow: 'option+shift+k',
   sendEmoji: 'command+enter',
   toggleInfo: 'command+\\',
+  searchMessenger: 'command+\/',
 };
 
 ///////////////////////////////////////
@@ -117,6 +122,12 @@ pb.registerShortcut('Send emoji', shortcuts.sendEmoji, (event, state) => {
 
 pb.registerShortcut('Toggle Conversation Information', shortcuts.toggleInfo, (event, state) => {
   triggerMouseEvent(page.getConversationInfo(), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+});
+
+pb.registerShortcut('Search Messenger', shortcuts.searchMessenger, (event, state) => {
+  triggerMouseEvent(page.getSearchMessengerElement(), 'click');
   event.preventDefault();
   event.stopPropagation();
 });
