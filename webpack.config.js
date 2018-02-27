@@ -28,7 +28,7 @@ if (fileSystem.existsSync(secretsPath)) {
 
 var fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf", "woff", "woff2"];
 
-var plugins = ['google', 'messenger'];
+var plugins = ['google', 'messenger', 'youtube'];
 var extractCssPlugins = [];
 
 var options = {
@@ -38,9 +38,6 @@ var options = {
     background: path.join(__dirname, "chrome-extension", "js", "background.js"),
     init: path.join(__dirname, "chrome-extension", "js", "init.js"),
     plugins: path.join(__dirname, "chrome-extension", "js", "plugins.js"),
-    // TODO: Dynamically generate these
-    // google: path.join(__dirname, "chrome-extension", "plugin", "google.ts"),
-    // messenger: path.join(__dirname, "chrome-extension", "plugin", "messenger.ts"),
   },
 
   // All file outputs from webpack will be under the 'build/' directory.
@@ -152,7 +149,6 @@ var cssConfig = {
 
 for (var i in plugins) {
   let plugin = plugins[i];
-  console.log(plugin);
   options.entry[plugin] = path.join(__dirname, "chrome-extension", "plugin", plugin + ".ts");
   var extractCss = new ExtractTextPlugin(plugin + '.css');
   options.module.rules.push({
