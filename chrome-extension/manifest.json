@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
 
-    "name": "Getting started example",
-    "description": "This extension allows the user to change the background color of the current page.",
+    "name": "Macro",
+    "description": "Macro provides a platform for web users to access, create, and distribute keyboard shortcuts for their favorite websites.",
     "version": "1.0",
     "background": {
       "scripts": ["background.js"],
