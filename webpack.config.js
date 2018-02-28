@@ -33,12 +33,10 @@ var extractCssPlugins = [];
 
 var options = {
   entry: {
-    popup: path.join(__dirname, "chrome-extension", "js", "popup.js"),
     options: path.join(__dirname, "chrome-extension", "js", "options.ts"),
     background: path.join(__dirname, "chrome-extension", "js", "background.js"),
     analytics: path.join(__dirname, "chrome-extension", "js", "analytics.js"),
     init: path.join(__dirname, "chrome-extension", "js", "init.js"),
-    plugins: path.join(__dirname, "chrome-extension", "js", "plugins.js"),
   },
 
   // All file outputs from webpack will be under the 'build/' directory.
@@ -115,19 +113,9 @@ var options = {
       to: "./img"
     }]),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "chrome-extension", "popup.html"),
-      filename: "popup.html",
-      chunks: ["popup"]
-    }),
-    new HtmlWebpackPlugin({
       template: path.join(__dirname, "chrome-extension", "options.html"),
       filename: "options.html",
       chunks: ["options"]
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, "chrome-extension", "background.html"),
-      filename: "background.html",
-      chunks: ["background"]
     }),
     // new ExtractTextPlugin('google.css'),
     new WriteFilePlugin()
