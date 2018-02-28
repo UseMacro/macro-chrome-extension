@@ -1,8 +1,9 @@
-import * as P from '../plugin/plugins.ts';
-let Plugins = P.default;
-
 // Async load data for given web page on page load
 // Listen to events to render shortcuts library
+import * as P from '../plugin/plugins.ts';
+import * as A from './analytics.js';
+let Plugins = P.default;
+let tracker = A.default;
 
 const URL_PATH = 'https://raw.githubusercontent.com/UseMacro/macro-data/master/configs/'
 const FILE_EXT = '.json'
@@ -130,6 +131,7 @@ function initPlugin(plugin) {
 
 function initShortcuts(url, renderPanel) {
   let domain = extractRootDomain(url);
+  tracker.sendEvent('shortcuts', 'initialized', domain);
   // TODO: support selecting one plugin from multiple per domain (use param?)
   getPlugin(domain,
     // success handler: if got plugins, merge MD shortcuts with plugins, cache & render
@@ -155,6 +157,7 @@ function initShortcuts(url, renderPanel) {
 function togglePopup(data) {
   if (data.sections.length > 0) {
     chrome.tabs.executeScript({ code: 'var data = ' + JSON.stringify(data) + ';' }, () => {
+      tracker.sendEvent('popup', 'script-executed', data.name);
       chrome.tabs.executeScript({ file: 'init.js' })
     });
   }
@@ -168,15 +171,16 @@ chrome.commands.onCommand.addListener((command) => {
   if (command === 'toggle-popup') {
     getCurrentTabUrl((url) => {
       let key = getDomainKey(url);
-        get(key, (data) => {
-          if (isEmpty(data)) {
-            initShortcuts(url, (shortcutData) => {
-              togglePopup(shortcutData);
-            });
-          } else {
-            togglePopup(data);
-          }
-        });
+      tracker.sendEvent('popup', 'toggled', key);
+      get(key, (data) => {
+        if (isEmpty(data)) {
+          initShortcuts(url, (shortcutData) => {
+            togglePopup(shortcutData);
+          });
+        } else {
+          togglePopup(data);
+        }
+      });
     });
   }
 });
@@ -202,7 +206,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.logEvent) {
+    tracker.sendEvent(request.eventCategory, request.eventAction, request.eventLabel);
+  }
+});
+
 // currently supports 1 plugin per domain
 function getPlugin(domain, success, failure) {
   domain in Plugins ? success(Plugins[domain]) : failure();
 }
+

@@ -44,6 +44,12 @@ export class Plugin {
         for (let s of this.shortcuts) {
           key(s.keys.join(', '), (event, handler) => {
             s.action(event, this.pluginState);
+            chrome.runtime.sendMessage({
+              logEvent: true,
+              eventCategory: 'shortcut-triggered',
+              eventAction: this.pluginName,
+              eventLabel: s.keys.join(', ')
+            });
           });
         }
       }

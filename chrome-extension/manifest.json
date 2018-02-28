@@ -1,18 +1,18 @@
 {
     "manifest_version": 2,
-
     "name": "Macro",
     "description": "Macro provides a platform for web users to access, create, and distribute keyboard shortcuts for their favorite websites.",
     "version": "1.0",
+    "icons": {
+        "128": "img/icon.png"
+    },
     "background": {
       "scripts": ["background.js"],
       "persistent": false
     },
     "options_page": "options.html",
     "browser_action": {
-        "default_icon": "img/icon.png",
-        "default_popup": "popup.html",
-        "default_title": "Click here!"
+        "default_icon": "img/icon.png"
     },
     "permissions": [
         "tabs",
@@ -20,9 +20,10 @@
         "webNavigation",
         "storage",
         "http://*/",
-        "https://*/"
+        "https://*/",
+        "*://*/*"
     ],
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "content_security_policy": "script-src 'self' https://www.google-analytics.com 'unsafe-eval'; object-src 'self'",
     "commands": {
         "toggle-popup": {
             "suggested_key": {

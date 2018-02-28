@@ -36,6 +36,7 @@ var options = {
     popup: path.join(__dirname, "chrome-extension", "js", "popup.js"),
     options: path.join(__dirname, "chrome-extension", "js", "options.ts"),
     background: path.join(__dirname, "chrome-extension", "js", "background.js"),
+    analytics: path.join(__dirname, "chrome-extension", "js", "analytics.js"),
     init: path.join(__dirname, "chrome-extension", "js", "init.js"),
     plugins: path.join(__dirname, "chrome-extension", "js", "plugins.js"),
   },
