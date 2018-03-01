@@ -186,18 +186,22 @@ chrome.commands.onCommand.addListener((command) => {
 });
 
 chrome.webNavigation.onCompleted.addListener((details) => {
-  let domain = extractRootDomain(details.url);
-  getPlugin(domain,
-    // success: initialize plugin scripts
-    (plugin) => {
-      let pluginName = plugin.default.pluginName
-      chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
-        chrome.tabs.insertCSS(details.tabId, { file: pluginName + '.css' }, () => {});
-        chrome.tabs.sendMessage(details.tabId, { loadShortcuts: true });
-      });
-    },
-    // fail: no plugins found, do nothing
-    () => {});
+  // 0 indicates the navigation happens in the tab content window
+  // a positive value indicates navigation in a subframe.
+  if (details.frameId === 0) {
+    let domain = extractRootDomain(details.url);
+    getPlugin(domain,
+        // success: initialize plugin scripts
+        (plugin) => {
+          let pluginName = plugin.default.pluginName
+            chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
+              chrome.tabs.insertCSS(details.tabId, { file: pluginName + '.css' }, () => {});
+              chrome.tabs.sendMessage(details.tabId, { loadShortcuts: true });
+            });
+        },
+        // fail: no plugins found, do nothing
+        () => {});
+  }
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
