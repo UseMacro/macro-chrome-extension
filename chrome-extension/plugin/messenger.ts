@@ -69,7 +69,6 @@ class MessengerPage {
     let rows = this.getRows();
     for (let i in unreadLinks) {
       let rowIndex = Array.prototype.indexOf.call(rows, unreadLinks[i]);
-      console.log(rowIndex);
       if (rowIndex > activeRowIndex) {
         return unreadLinks[i].querySelector('a[role=link]');
       }
@@ -119,7 +118,6 @@ class MessengerPage {
   getSearchConversationDoneElement() {
     let buttons = Array.prototype.slice.call(document.querySelectorAll('button[role="button"]'));
     for (let i = 0; i < buttons.length; i++) {
-      console.log(buttons[i].innerHTML);
       if (buttons[i].innerHTML == 'Done') {
         return buttons[i];
       }
@@ -187,7 +185,6 @@ pb.registerShortcut('Toggle Conversation Information', shortcuts.toggleInfo, (ev
 pb.registerShortcut('Search Messenger', shortcuts.searchMessenger, (event, state) => {
 
   let searchElem = page.getSearchMessengerElement()
-  console.log(searchElem);
   if (searchElem === document.activeElement) {
     triggerMouseEvent(page.getMessageInputElement(), 'click');
   } else {
@@ -227,7 +224,6 @@ pb.registerShortcut('Compose new message', shortcuts.composeMessage, (event, sta
 });
 
 function viewChat(i, event, state) {
-  console.log(page.getRow(i));
   triggerMouseEvent(page.getRow(i), 'click');
   event.preventDefault();
   event.stopPropagation();
