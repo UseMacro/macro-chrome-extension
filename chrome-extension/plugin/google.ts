@@ -79,7 +79,8 @@ let page = new GooglePage();
 let shortcuts = {
   nextLink: 'j',
   previousLink: 'k',
-  clickLink: 'enter',
+  openLink: 'enter',
+  openLinkNewTab: 'command+enter',
   nextPage: 'l',
   previousPage: 'h',
   focusSearchInput: '/',
@@ -127,10 +128,14 @@ function triggerMouseEvent(node, eventType) {
   node.dispatchEvent(clickEvent);
 }
 
-pb.registerShortcut('Click link', shortcuts.clickLink, (event, state) => {
-  triggerMouseEvent(getLink(page, state.linkIndex), 'click');
-  event.preventDefault();
-  event.stopPropagation();
+pb.registerShortcut('Open link', shortcuts.openLink, (event, state) => {
+  let link = getLink(page, state.linkIndex);
+  location.href = link.href;
+});
+
+pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, state) => {
+  let link = getLink(page, state.linkIndex);
+  window.open(link.href, '_blank');
 });
 
 pb.registerShortcut('Next page', shortcuts.nextPage, (event, state) => {
