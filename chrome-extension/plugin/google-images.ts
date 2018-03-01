@@ -1,16 +1,17 @@
 import { Plugin, PluginBuilder } from './pluginbuilder.ts';
-import * as styles from './google.css';
+import * as styles from './google-images.css';
 
 const HIGHLIGHTED_LINK_MARGIN = 100;
+const BORDER_SIZE = 8;
+const IMAGE_MARGIN = 12;
 
 class GooglePage {
   links: HTMLElement[];
-  nextPage: HTMLAnchorElement;
-  prevPage: HTMLAnchorElement;
+  imageGrid: any;
   tabsDict: object;
 
   constructor() {
-    this.links = Array.prototype.slice.call(document.querySelectorAll('h3.r a'));
+    this.links = Array.prototype.slice.call(document.querySelectorAll('a[href*="/imgres?imgurl"]'));
     this.tabsDict = {
       images: document.querySelector('a[class="q qs"][href*="&tbm=isch"]'),
       videos: document.querySelector('a[class="q qs"][href*="&tbm=vid"]'),
@@ -18,8 +19,6 @@ class GooglePage {
       news: document.querySelector('a[class="q qs"][href*="&tbm=nws"]'),
       shopping: document.querySelector('a[class="q qs"][href*="&tbm=shop"]')
     };
-    this.nextPage = document.querySelector('#pnnext');
-    this.prevPage = document.querySelector('#pnprev');
     if (this.links.length > 0) {
       updateFocusedLink(this.links[0]);
     }
@@ -32,14 +31,6 @@ class GooglePage {
   getLinkCount() : number {
     return this.links.length;
   }
-
-  getNextPage() : HTMLAnchorElement {
-    return this.nextPage;
-  }
-
-  getPreviousPage() : HTMLAnchorElement {
-    return this.prevPage;
-  }
 }
 
 //////////////////////
@@ -48,6 +39,26 @@ class GooglePage {
 
 function getSearchInput() {
   return document.getElementById('lst-ib');
+}
+
+function updateImageSearchLinks() {
+  // This page has infinite scroll, so refresh links occasionally and compute the grid
+  page.links = Array.prototype.slice.call(document.querySelectorAll('a[href*="/imgres?imgurl"]'));
+  // Represents the layout of images on the page
+  page.imageGrid = [];
+  var imageRow = [];
+  var rowSize = 0;
+  for (let link of page.links) {
+    let div = link.parentElement;
+    if (rowSize + getWidth(div) > window.innerWidth) {
+      page.imageGrid.push(imageRow);
+      imageRow = [];
+      rowSize = 0;
+    }
+    rowSize += getWidth(div) + IMAGE_MARGIN;
+    imageRow.push(link);
+  }
+  page.imageGrid.push(imageRow);
 }
 
 function getLink(page, index) {
@@ -59,8 +70,25 @@ function updateFocusedLinkAtIndex(index) {
   updateFocusedLink(link);
 }
 
+function getWidth(el) {
+ return Number(el.style.width.split('px')[0])
+}
+
+function getHeight(el) {
+ return Number(el.style.height.split('px')[0])
+}
+
+function adjustSize(el, widthDiff, heightDiff) {
+  let width =  getWidth(el) + widthDiff;
+  let height = getHeight(el) + heightDiff;
+  el.style.width = width + 'px';
+  el.style.height = height + 'px';
+}
+
 function updateFocusedLink(link) {
-  link.className += ' ' + styles.test;
+  let div = link.parentElement;
+  div.className += ' ' + styles.border;
+  adjustSize(div, -BORDER_SIZE, -BORDER_SIZE);
   let linkPos = link.getBoundingClientRect().top;
 
   if (linkPos < HIGHLIGHTED_LINK_MARGIN) {
@@ -75,7 +103,10 @@ function updateFocusedLink(link) {
 function clearHighlights(page) {
   for (let i = 0; i < page.getLinkCount(); i++) {
     let link = getLink(page, i);
-    link.classList.remove(styles.test);
+    if (link.parentElement.classList.contains(styles.border)) {
+      link.parentElement.classList.remove(styles.border);
+      adjustSize(link.parentElement, BORDER_SIZE, BORDER_SIZE);
+    }
   }
 }
 
@@ -85,12 +116,12 @@ function clearHighlights(page) {
 let page = new GooglePage();
 
 let shortcuts = {
-  nextLink: 'j',
-  previousLink: 'k',
+  down: 'j',
+  up: 'k',
+  right: 'l',
+  left: 'h',
   openLink: 'enter',
   openLinkNewTab: 'command+enter',
-  nextPage: 'l',
-  previousPage: 'h',
   focusSearchInput: '/',
   highlightSearchInput: 'command+/',
   navigateAllTab: 'a',
@@ -105,8 +136,8 @@ let shortcuts = {
 
 let pb = new PluginBuilder();
 
-pb.setPluginName('google');
-pb.setUrlRegex(/^https:\/\/www.google.[a-z]{2,3}\/search\?((?!tbm=isch).)*$/);
+pb.setPluginName('google-images');
+pb.setUrlRegex(/^https:\/\/www.google.[a-z]{2,3}\/search\?.*&tbm=isch/);
 
 pb.setInitialState({
   linkIndex: 0
@@ -117,20 +148,107 @@ function incrementIndex(state, val) {
   state.set({ linkIndex: nextIndex });
 }
 
-pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
+pb.registerShortcut('Down', shortcuts.down, (event, state) => {
   if (getSearchInput() === document.activeElement) return;
+
+  updateImageSearchLinks();
+  let link = getLink(page, state.linkIndex);
+
+  for (let i = 0; i < page.imageGrid.length; i++) {
+    let rowLength = page.imageGrid[i].length;
+    let nextRowLength = page.imageGrid[i + 1].length;
+    let colIndex = page.imageGrid[i].indexOf(link);
+
+    if (colIndex === 0) {
+      incrementIndex(state, rowLength);
+      break;
+    } else if (colIndex === rowLength - 1) {
+      incrementIndex(state, nextRowLength);
+      break;
+    } else if (colIndex > -1) {
+      rowLength > nextRowLength ? incrementIndex(state, rowLength) : incrementIndex(state, nextRowLength);
+      break;
+    }
+  }
   clearHighlights(page);
-  incrementIndex(state, 1);
   updateFocusedLinkAtIndex(state.linkIndex);
 });
 
-pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
+pb.registerShortcut('Up', shortcuts.up, (event, state) => {
   if (getSearchInput() === document.activeElement) return;
 
+  updateImageSearchLinks();
+  let link = getLink(page, state.linkIndex);
+
+  for (let i = 0; i < page.imageGrid.length; i++) {
+    let rowLength = page.imageGrid[i].length;
+    let nextRowLength = i === 0 ? 0 : page.imageGrid[i - 1].length;
+    let colIndex = page.imageGrid[i].indexOf(link);
+
+    if (colIndex > -1 && i === 0) {
+      // When we're at the top row do nothing
+      return;
+    }
+
+    if (colIndex === 0) {
+      incrementIndex(state, -nextRowLength);
+      break;
+    } else if (colIndex === rowLength - 1) {
+      incrementIndex(state, -rowLength);
+      break;
+    } else if (colIndex > -1) {
+      rowLength < nextRowLength ? incrementIndex(state, -rowLength) : incrementIndex(state, -nextRowLength);
+      break;
+    }
+  }
+
   clearHighlights(page);
-  incrementIndex(state, -1);
   updateFocusedLinkAtIndex(state.linkIndex);
 });
+
+pb.registerShortcut('Right', shortcuts.right, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
+    clearHighlights(page);
+    updateImageSearchLinks();
+
+    let link = getLink(page, state.linkIndex);
+    for (let i = 0; i < page.imageGrid.length; i++) {
+      let colIndex = page.imageGrid[i].indexOf(link);
+      if (colIndex > -1) {
+        if (colIndex < page.imageGrid[i].length - 1) {
+          incrementIndex(state, 1);
+        }
+        break;
+      }
+    }
+    updateFocusedLinkAtIndex(state.linkIndex);
+});
+
+pb.registerShortcut('Left', shortcuts.left, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
+    clearHighlights(page);
+    updateImageSearchLinks();
+
+  let link = getLink(page, state.linkIndex);
+  for (let i = 0; i < page.imageGrid.length; i++) {
+    let colIndex = page.imageGrid[i].indexOf(link);
+    if (colIndex > -1) {
+      if (colIndex > 0) {
+        incrementIndex(state, -1);
+      }
+      break;
+    }
+  }
+  updateFocusedLinkAtIndex(state.linkIndex);
+});
+
+function triggerMouseEvent(node, eventType) {
+  let clickEvent = document.createEvent('MouseEvents');
+  clickEvent.initEvent(eventType, true, true);
+  node.dispatchEvent(clickEvent);
+}
 
 function navigate(link) {
   if (link) location.href = link.href;
@@ -138,8 +256,7 @@ function navigate(link) {
 
 pb.registerShortcut('Open link', shortcuts.openLink, (event, state) => {
   if (getSearchInput() === document.activeElement) return;
-
-  navigate(getLink(page, state.linkIndex));
+  triggerMouseEvent(getLink(page, state.linkIndex), 'click');
 });
 
 pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, state) => {
@@ -147,16 +264,6 @@ pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, st
 
   let link = getLink(page, state.linkIndex);
   window.open(link.href, '_blank');
-});
-
-pb.registerShortcut('Next page', shortcuts.nextPage, (event, state) => {
-  if (getSearchInput() === document.activeElement) return;
-  navigate(page.getNextPage());
-});
-
-pb.registerShortcut('Previous page', shortcuts.previousPage, (event, state) => {
-  if (getSearchInput() === document.activeElement) return;
-  navigate(page.getPreviousPage());
 });
 
 pb.registerShortcut('Focus on Search Input', shortcuts.focusSearchInput, (event, state) => {

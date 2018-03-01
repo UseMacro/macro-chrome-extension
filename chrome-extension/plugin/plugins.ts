@@ -1,7 +1,8 @@
 import * as Google from './google.ts';
+import * as GoogleImages from './google-images.ts';
 import * as Messenger from './messenger.ts';
 
-let plugins = [Google, Messenger];
+let plugins = [Google, Messenger, GoogleImages];
 // @ts-ignore
 let pluginNameSet = new Set([]);
 
