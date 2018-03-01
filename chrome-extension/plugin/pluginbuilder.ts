@@ -1,7 +1,5 @@
 import * as key from 'keymaster';
 
-const DOMAIN_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
-
 class PluginState {
   state: any;
 
@@ -22,17 +20,17 @@ class PluginState {
   }
 }
 
-// Plugin manages a set of keyboard shortcuts for a set of domain
+// Plugin manages a set of keyboard shortcuts for a url that matches the regex
 // Note: stores shortcuts in DS
 export class Plugin {
   pluginName: string; // Should be the same as the filename
-  domains: string[];
+  urlRegex: any;
   shortcuts: any[]; // DS
   pluginState: any;
 
-  constructor(pluginName: string, domains: string[], shortcuts: any[], state: any) {
+  constructor(pluginName: string, urlRegex: any, shortcuts: any[], state: any) {
     this.pluginName = pluginName;
-    this.domains = domains;
+    this.urlRegex = urlRegex;
     this.shortcuts = shortcuts; // DS
     this.pluginState = new PluginState(state);
     this.init();
@@ -84,11 +82,11 @@ export class Plugin {
   // }
 }
 
-// Provides an API for third party developers to create customs plugins for a set of domains
+// Provides an API for third party developers to create customs plugins for a url that matches our regex
 // Note: PluginBuilder only handles shortcuts defined in developer schema (DS)
 export class PluginBuilder {
   pluginName: string;
-  domains: string[];
+  urlRegex: any;
   // PluginBuilder requires shortcuts to be in DS
   shortcuts: any;
   state: any;
@@ -96,7 +94,6 @@ export class PluginBuilder {
   constructor() {
     this.shortcuts = {};
     this.state = {};
-    this.domains = [];
   }
 
   // TODO: Handle scopes from keymaster
@@ -124,11 +121,8 @@ export class PluginBuilder {
     this.pluginName = pluginName;
   }
 
-  addDomainName(domainName: string) : void {
-    if (!DOMAIN_REGEX.test(domainName)) {
-      throw 'Not a valid domain';
-    }
-    this.domains.push(domainName);
+  setUrlRegex(urlRegex: any) : void {
+    this.urlRegex = urlRegex;
   }
 
   validateConfig(config: any) : boolean {
@@ -159,8 +153,8 @@ export class PluginBuilder {
       throw 'Plugin name is missing'
     }
 
-    if (this.domains.length === 0) {
-      throw 'Domain name is missing for plugin: ' + this.pluginName;
+    if (!this.urlRegex) {
+      throw 'URL regex is missing'
     }
 
     if (Object.keys(this.shortcuts).length === 0) {
@@ -176,6 +170,6 @@ export class PluginBuilder {
       });
     }
 
-    return new Plugin(this.pluginName, this.domains, shortcuts, this.state);
+    return new Plugin(this.pluginName, this.urlRegex, shortcuts, this.state);
   }
 }

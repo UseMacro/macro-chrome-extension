@@ -75,9 +75,15 @@ function extractRootDomain(url) {
   return domain;
 }
 
-function getDomainKey(url) {
-  let domain = extractRootDomain(url);
-  return URL_PATH.concat(domain, FILE_EXT);
+function getShortcutsDataPath(url) {
+  let plugin = getPlugin(url);
+  if (plugin) {
+    return URL_PATH.concat(plugin.default.pluginName, FILE_EXT);
+  } else {
+    // TODO: need to deprecate domain matching in favour of regex matching
+    let domain = extractRootDomain(url);
+    return URL_PATH.concat(domain, FILE_EXT);
+  }
 }
 
 // always calls callback: shortcuts missing from MD should not interrupt flow
@@ -130,28 +136,25 @@ function initPlugin(plugin) {
 }
 
 function initShortcuts(url, renderPanel) {
-  let domain = extractRootDomain(url);
-  tracker.sendEvent('shortcuts', 'initialized', domain);
-  // TODO: support selecting one plugin from multiple per domain (use param?)
-  getPlugin(domain,
+  let plugin = getPlugin(url);
+  tracker.sendEvent('shortcuts', 'initialized', plugin.default.pluginName);
+  if (plugin) {
     // success handler: if got plugins, merge MD shortcuts with plugins, cache & render
-    (plugin) => {
-      let domainKey = getDomainKey(url);
-      getShortcutData(domainKey, (shortcuts) => {
-        let data = mergeData(shortcuts, plugin.default.getShortcutsMDS());
-        save(domainKey, data);
-        renderPanel(data);
-      });
-      initPlugin(plugin);
-    },
+    let key = getShortcutsDataPath(url);
+    getShortcutData(key, (shortcuts) => {
+      let data = mergeData(shortcuts, plugin.default.getShortcutsMDS());
+      save(key, data);
+      renderPanel(data);
+    });
+    initPlugin(plugin);
+  } else {
     // failure handler: if no plugins, use MD shortcuts, cache & render
-    () => {
-      let domainKey = getDomainKey(url);
-      getShortcutData(domainKey, (shortcuts) => {
-        save(domainKey, shortcuts);
-        renderPanel(shortcuts);
-      });
-  });
+    let key = getShortcutsDataPath(url);
+    getShortcutData(key, (shortcuts) => {
+      save(key, shortcuts);
+      renderPanel(shortcuts);
+    });
+  }
 }
 
 function togglePopup(data) {
@@ -170,7 +173,7 @@ function isEmpty(obj) {
 chrome.commands.onCommand.addListener((command) => {
   if (command === 'toggle-popup') {
     getCurrentTabUrl((url) => {
-      let key = getDomainKey(url);
+      let key = getShortcutsDataPath(url);
       tracker.sendEvent('popup', 'toggled', key);
       get(key, (data) => {
         if (isEmpty(data)) {
@@ -189,18 +192,14 @@ chrome.webNavigation.onCompleted.addListener((details) => {
   // 0 indicates the navigation happens in the tab content window
   // a positive value indicates navigation in a subframe.
   if (details.frameId === 0) {
-    let domain = extractRootDomain(details.url);
-    getPlugin(domain,
-        // success: initialize plugin scripts
-        (plugin) => {
-          let pluginName = plugin.default.pluginName
-            chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
-              chrome.tabs.insertCSS(details.tabId, { file: pluginName + '.css' }, () => {});
-              chrome.tabs.sendMessage(details.tabId, { loadShortcuts: true });
-            });
-        },
-        // fail: no plugins found, do nothing
-        () => {});
+    let plugin = getPlugin(details.url);
+    if (plugin) {
+      let pluginName = plugin.default.pluginName;
+      chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
+        chrome.tabs.insertCSS(details.tabId, { file: pluginName + '.css' }, () => {});
+        chrome.tabs.sendMessage(details.tabId, { loadShortcuts: true });
+      });
+    }
   }
 });
 
@@ -216,8 +215,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// currently supports 1 plugin per domain
-function getPlugin(domain, success, failure) {
-  domain in Plugins ? success(Plugins[domain]) : failure();
+function getPlugin(url) {
+  for (let plugin of Plugins) {
+    if (plugin.default.urlRegex.test(url)) {
+      return plugin;
+    }
+  }
+  return null;
 }
 

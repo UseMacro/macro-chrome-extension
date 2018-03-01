@@ -39,7 +39,7 @@ let shortcuts = {
 let pb = new PluginBuilder();
 
 pb.setPluginName('youtube');
-pb.addDomainName('youtube.com');
+pb.setUrlRegex(/^https:\/\/www.youtube.[a-z]{2,3}/);
 pb.setInitialState({
   higlightedIndex: -1
 });

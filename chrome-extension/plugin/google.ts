@@ -106,9 +106,7 @@ let shortcuts = {
 let pb = new PluginBuilder();
 
 pb.setPluginName('google');
-
-pb.addDomainName('google.com');
-pb.addDomainName('google.ca');
+pb.setUrlRegex(/^https:\/\/www.google.[a-z]{2,3}\/search\?/);
 
 pb.setInitialState({
   linkIndex: 0

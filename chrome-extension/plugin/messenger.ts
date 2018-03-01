@@ -28,7 +28,7 @@ let shortcuts = {
 let pb = new PluginBuilder();
 
 pb.setPluginName('messenger');
-pb.addDomainName('messenger.com');
+pb.setUrlRegex(/^https:\/\/www.messenger.com/);
 pb.setInitialState({});
 
 class MessengerPage {
