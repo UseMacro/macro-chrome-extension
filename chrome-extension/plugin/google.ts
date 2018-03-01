@@ -12,6 +12,9 @@ class GooglePage {
     this.links = Array.prototype.slice.call(document.querySelectorAll('h3.r a'));
     this.nextPage = document.querySelector('#pnnext');
     this.prevPage = document.querySelector('#pnprev');
+    if (this.links.length > 0) {
+      updateFocusedLink(this.links[0]);
+    }
   }
 
   getLink(index: number) {
@@ -43,8 +46,12 @@ function getLink(page, index) {
   return page.getLink(index);
 }
 
-function updateFocusedLink(index) {
+function updateFocusedLinkAtIndex(index) {
   let link = getLink(page, index);
+  updateFocusedLink(link);
+}
+
+function updateFocusedLink(link) {
   link.className += ' ' + styles.test;
   let linkPos = link.getBoundingClientRect().top;
 
@@ -100,7 +107,7 @@ pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
   state.set({ linkIndex: nextIndex });
 
   // Update which link is focused
-  updateFocusedLink(state.linkIndex);
+  updateFocusedLinkAtIndex(state.linkIndex);
 });
 
 pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
@@ -111,7 +118,7 @@ pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
   state.set({ linkIndex: prevIndex });
 
   // Update which link is focused
-  updateFocusedLink(state.linkIndex);
+  updateFocusedLinkAtIndex(state.linkIndex);
 });
 
 function triggerMouseEvent(node, eventType) {
