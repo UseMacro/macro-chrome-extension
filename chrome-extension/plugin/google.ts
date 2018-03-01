@@ -85,20 +85,20 @@ function clearHighlights(page) {
 let page = new GooglePage();
 
 let shortcuts = {
-  nextLink: 'option+j',
-  previousLink: 'option+k',
+  nextLink: 'j',
+  previousLink: 'k',
   openLink: 'enter',
   openLinkNewTab: 'command+enter',
-  nextPage: 'option+l',
-  previousPage: 'option+h',
-  focusSearchInput: 'option+/',
+  nextPage: 'l',
+  previousPage: 'h',
+  focusSearchInput: '/',
   highlightSearchInput: 'command+/',
-  navigateAllTab: 'option+a',
-  navigateImagesTab: 'option+i',
-  navigateVideosTab: 'option+v',
-  navigateMapsTab: 'option+m',
-  navigateNewsTab: 'option+n',
-  navigateShoppingTab: 'option+s',
+  navigateAllTab: 'a',
+  navigateImagesTab: 'i',
+  navigateVideosTab: 'v',
+  navigateMapsTab: 'm',
+  navigateNewsTab: 'n',
+  navigateShoppingTab: 's',
 };
 
 ///////////////////////
@@ -115,6 +115,8 @@ pb.setInitialState({
 });
 
 pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   // Clear existing classes
   clearHighlights(page);
 
@@ -126,6 +128,8 @@ pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
 });
 
 pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   // Clear existing classes
   clearHighlights(page);
 
@@ -149,23 +153,33 @@ function navigate(link) {
 }
 
 pb.registerShortcut('Open link', shortcuts.openLink, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   navigate(getLink(page, state.linkIndex));
 });
 
 pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   let link = getLink(page, state.linkIndex);
   window.open(link.href, '_blank');
 });
 
 pb.registerShortcut('Next page', shortcuts.nextPage, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   navigate(page.getNextPage());
 });
 
 pb.registerShortcut('Previous page', shortcuts.previousPage, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   navigate(page.getPreviousPage());
 });
 
 pb.registerShortcut('Focus on Search Input', shortcuts.focusSearchInput, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   let searchInput = getSearchInput();
   searchInput.focus();
   event.preventDefault();
@@ -181,6 +195,8 @@ pb.registerShortcut('Focus on Search Input', shortcuts.focusSearchInput, (event,
 });
 
 pb.registerShortcut('Highlight Search Input', shortcuts.highlightSearchInput, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   let searchInput = getSearchInput();
   searchInput.focus();
   event.preventDefault();
@@ -191,30 +207,37 @@ pb.registerShortcut('Highlight Search Input', shortcuts.highlightSearchInput, (e
 });
 
 pb.registerShortcut('Navigate to all tab', shortcuts.navigateAllTab, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
   location.href = location.href.split('&')[0];
 });
 
 pb.registerShortcut('Navigate to images tab', shortcuts.navigateImagesTab, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
   // @ts-ignore
   navigate(page.tabsDict.images);
 });
 
 pb.registerShortcut('Navigate to videos tab', shortcuts.navigateVideosTab, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
   // @ts-ignore
   navigate(page.tabsDict.videos);
 });
 
 pb.registerShortcut('Navigate to maps tab', shortcuts.navigateMapsTab, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
   // @ts-ignore
   navigate(page.tabsDict.maps);
 });
 
 pb.registerShortcut('Navigate to news tab', shortcuts.navigateNewsTab, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
   // @ts-ignore
   navigate(page.tabsDict.news);
 });
 
 pb.registerShortcut('Navigate to shopping tab', shortcuts.navigateShoppingTab, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
   // @ts-ignore
   navigate(page.tabsDict.shopping);
 });
