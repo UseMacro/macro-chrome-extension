@@ -1,5 +1,35 @@
 import { Plugin, PluginBuilder } from './pluginbuilder.ts';
-import * as styles from './messenger.css';
+
+let shortcuts = {
+  nextRow: 'option+j',
+  previousRow: 'option+k',
+  nextUnreadRow: 'option+shift+j,option+shift+down',
+  previousUnreadRow: 'option+shift+k,option+shift+up',
+  sendEmoji: 'command+enter',
+  toggleInfo: 'option+\\',
+  searchMessenger: 'option+\/',
+  messageInput: 'escape',
+  composeMessage: 'option+c',
+  searchConversation: 'option+f',
+
+  // Xth chat
+  firstChat: 'option+1',
+  secondChat: 'option+2',
+  thirdChat: 'option+3',
+  fourthChat: 'option+4',
+  fifthChat: 'option+5',
+  sixthChat: 'option+6',
+  seventhChat: 'option+7',
+  eighthChat: 'option+8',
+  ninthChat: 'option+9',
+};
+
+///////////////////////////////////////
+let pb = new PluginBuilder();
+
+pb.setPluginName('messenger');
+pb.addDomainName('messenger.com');
+pb.setInitialState({});
 
 class MessengerPage {
 
@@ -9,16 +39,24 @@ class MessengerPage {
     return document.querySelectorAll('li[role=row]');
   }
 
+  getRow(i) {
+    return Array.prototype.slice.call(this.getRows())[i].querySelector('a[role=link]');
+  }
+
   getActiveRow() {
     return document.querySelector('li[aria-relevant="additions text"]:not([aria-live="polite"])');
   }
 
   getNextRowLink() : HTMLAnchorElement {
-    return (this.getActiveRow().nextSibling as HTMLElement).querySelector('a[role=link]');
+    let nextSibling = this.getActiveRow().nextSibling as HTMLElement;
+    if (!nextSibling) { return null; }
+    return nextSibling.querySelector('a[role=link]');
   }
 
   getPreviousRowLink() : HTMLAnchorElement {
-    return (this.getActiveRow().previousSibling as HTMLElement).querySelector('a[role=link]');
+    let prevSibling = this.getActiveRow().previousSibling as HTMLElement;
+    if (!prevSibling) { return null; }
+    return prevSibling.querySelector('a[role=link]');
   }
 
   getUnreadLinks() : HTMLAnchorElement[] {
@@ -63,11 +101,11 @@ class MessengerPage {
   }
 
   getSearchMessengerElement() {
-    return document.querySelector('div[role=banner] ~ div label');
+    return document.querySelector('div[role=banner] ~ div label input');
   }
 
   getMessageInputElement() {
-    return document.querySelector('div[aria-label="Type a message..."]');
+    return document.querySelector('div[contenteditable="true"][role="combobox"]');
   }
 
   getComposeMessageElement() {
@@ -77,37 +115,47 @@ class MessengerPage {
   getSearchConversationElement() {
     return document.querySelector('._3szn._3szo ._5odt');
   }
+
+  getSearchConversationDoneElement() {
+    let buttons = Array.prototype.slice.call(document.querySelectorAll('button[role="button"]'));
+    for (let i = 0; i < buttons.length; i++) {
+      console.log(buttons[i].innerHTML);
+      if (buttons[i].innerHTML == 'Done') {
+        return buttons[i];
+      }
+    }
+    return null;
+  }
+}
+
+/////////////////////////////////////////////
+
+function triggerMouseEvent(node, eventType) {
+  if (node.fireEvent) {
+    node.fireEvent('on' + event);
+  } else {
+    let clickEvent = document.createEvent('MouseEvents');
+    clickEvent.initEvent(eventType, true, true);
+    node.dispatchEvent(clickEvent);
+  }
 }
 
 let page = new MessengerPage();
-let shortcuts = {
-  nextRow: 'option+j',
-  previousRow: 'option+k',
-  nextUnreadRow: 'option+shift+j',
-  previousUnreadRow: 'option+shift+k',
-  sendEmoji: 'command+enter',
-  toggleInfo: 'option+\\',
-  searchMessenger: 'option+\/',
-  messageInput: 'escape',
-  composeMessage: 'option+c',
-  searchConversation: 'option+f'
-};
-
-///////////////////////////////////////
-let pb = new PluginBuilder();
-
-pb.setPluginName('messenger');
-pb.addDomainName('messenger.com');
-pb.setInitialState({});
 
 pb.registerShortcut('Next chat', shortcuts.nextRow, (event, state) => {
-  page.getNextRowLink().click();
+  let nextRomElem = page.getNextRowLink();
+  if (nextRomElem) {
+    nextRomElem.click();
+  }
   event.preventDefault();
   event.stopPropagation();
 });
 
 pb.registerShortcut('Previous chat', shortcuts.previousRow, (event, state) => {
-  page.getPreviousRowLink().click();
+  let prevRowElem = page.getPreviousRowLink();
+  if (prevRowElem) {
+    prevRowElem.click();
+  }
   event.preventDefault();
   event.stopPropagation();
 });
@@ -124,16 +172,6 @@ pb.registerShortcut('Previous unread chat', shortcuts.previousUnreadRow, (event,
   event.stopPropagation();
 });
 
-function triggerMouseEvent(node, eventType) {
-  if (node.fireEvent) {
-    node.fireEvent('on' + event);
-  } else {
-    let clickEvent = document.createEvent('MouseEvents');
-    clickEvent.initEvent(eventType, true, true);
-    node.dispatchEvent(clickEvent);
-  }
-}
-
 pb.registerShortcut('Send emoji', shortcuts.sendEmoji, (event, state) => {
   triggerMouseEvent(page.getEmojiElement(), 'click');
   event.preventDefault();
@@ -147,13 +185,25 @@ pb.registerShortcut('Toggle Conversation Information', shortcuts.toggleInfo, (ev
 });
 
 pb.registerShortcut('Search Messenger', shortcuts.searchMessenger, (event, state) => {
-  triggerMouseEvent(page.getSearchMessengerElement(), 'click');
+
+  let searchElem = page.getSearchMessengerElement()
+  console.log(searchElem);
+  if (searchElem === document.activeElement) {
+    triggerMouseEvent(page.getMessageInputElement(), 'click');
+  } else {
+    (searchElem as HTMLInputElement).focus();
+  }
   event.preventDefault();
   event.stopPropagation();
 });
 
 pb.registerShortcut('Search Conversation', shortcuts.searchConversation, (event, state) => {
-  triggerMouseEvent(page.getSearchConversationElement(), 'click');
+  let done = page.getSearchConversationDoneElement();
+  if (done) {
+    triggerMouseEvent(done, 'click');
+  } else {
+    triggerMouseEvent(page.getSearchConversationElement(), 'click');
+  }
   event.preventDefault();
   event.stopPropagation();
 });
@@ -170,7 +220,30 @@ pb.registerShortcut('Compose new message', shortcuts.composeMessage, (event, sta
   event.stopPropagation();
 });
 
-styles.test;
+pb.registerShortcut('Compose new message', shortcuts.composeMessage, (event, state) => {
+  triggerMouseEvent(page.getComposeMessageElement(), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+});
+
+function viewChat(i, event, state) {
+  console.log(page.getRow(i));
+  triggerMouseEvent(page.getRow(i), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+pb.registerShortcut('View first chat', shortcuts.firstChat, viewChat.bind(this, 0));
+pb.registerShortcut('View second chat', shortcuts.secondChat, viewChat.bind(this, 1));
+pb.registerShortcut('View third chat', shortcuts.thirdChat, viewChat.bind(this, 2));
+pb.registerShortcut('View fourth chat', shortcuts.fourthChat, viewChat.bind(this, 3));
+pb.registerShortcut('View fifth chat', shortcuts.fifthChat, viewChat.bind(this, 4));
+pb.registerShortcut('View sixth chat', shortcuts.sixthChat, viewChat.bind(this, 5));
+pb.registerShortcut('View seventh chat', shortcuts.seventhChat, viewChat.bind(this, 6));
+pb.registerShortcut('View eighth chat', shortcuts.eighthChat, viewChat.bind(this, 7));
+pb.registerShortcut('View ninth chat', shortcuts.ninthChat, viewChat.bind(this, 8));
+
+
 
 let plugin = pb.build();
 export default plugin;
