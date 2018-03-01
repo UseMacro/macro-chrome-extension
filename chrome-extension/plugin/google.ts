@@ -7,9 +7,17 @@ class GooglePage {
   links: HTMLElement[];
   nextPage: HTMLAnchorElement;
   prevPage: HTMLAnchorElement;
+  tabsDict: object;
 
   constructor() {
     this.links = Array.prototype.slice.call(document.querySelectorAll('h3.r a'));
+    this.tabsDict = {
+      images: document.querySelector('a[class="q qs"][href*="&tbm=isch"]'),
+      videos: document.querySelector('a[class="q qs"][href*="&tbm=vid"]'),
+      maps: document.querySelector('a[class="q qs"][href*="maps.google."]'),
+      news: document.querySelector('a[class="q qs"][href*="&tbm=nws"]'),
+      shopping: document.querySelector('a[class="q qs"][href*="&tbm=shop"]')
+    };
     this.nextPage = document.querySelector('#pnnext');
     this.prevPage = document.querySelector('#pnprev');
     if (this.links.length > 0) {
@@ -77,14 +85,20 @@ function clearHighlights(page) {
 let page = new GooglePage();
 
 let shortcuts = {
-  nextLink: 'j',
-  previousLink: 'k',
+  nextLink: 'option+j',
+  previousLink: 'option+k',
   openLink: 'enter',
   openLinkNewTab: 'command+enter',
-  nextPage: 'l',
-  previousPage: 'h',
-  focusSearchInput: '/',
-  highlightSearchInput: 'command+/'
+  nextPage: 'option+l',
+  previousPage: 'option+h',
+  focusSearchInput: 'option+/',
+  highlightSearchInput: 'command+/',
+  navigateAllTab: 'option+a',
+  navigateImagesTab: 'option+i',
+  navigateVideosTab: 'option+v',
+  navigateMapsTab: 'option+m',
+  navigateNewsTab: 'option+n',
+  navigateShoppingTab: 'option+s',
 };
 
 ///////////////////////
@@ -128,9 +142,14 @@ function triggerMouseEvent(node, eventType) {
   node.dispatchEvent(clickEvent);
 }
 
+function navigate(link) {
+  if (link) {
+    location.href = link.href;
+  }
+}
+
 pb.registerShortcut('Open link', shortcuts.openLink, (event, state) => {
-  let link = getLink(page, state.linkIndex);
-  location.href = link.href;
+  navigate(getLink(page, state.linkIndex));
 });
 
 pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, state) => {
@@ -139,21 +158,11 @@ pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, st
 });
 
 pb.registerShortcut('Next page', shortcuts.nextPage, (event, state) => {
-  let nextPage = page.getNextPage();
-  if (!nextPage) {
-    return;
-  }
-
-  location.href = nextPage.href;
+  navigate(page.getNextPage());
 });
 
 pb.registerShortcut('Previous page', shortcuts.previousPage, (event, state) => {
-  let prevPage = page.getPreviousPage();
-  if (!prevPage) {
-    return;
-  }
-
-  location.href = prevPage.href;
+  navigate(page.getPreviousPage());
 });
 
 pb.registerShortcut('Focus on Search Input', shortcuts.focusSearchInput, (event, state) => {
@@ -179,6 +188,35 @@ pb.registerShortcut('Highlight Search Input', shortcuts.highlightSearchInput, (e
 
   // @ts-ignore
   searchInput.setSelectionRange(0, searchInput.value.length);
+});
+
+pb.registerShortcut('Navigate to all tab', shortcuts.navigateAllTab, (event, state) => {
+  location.href = location.href.split('&')[0];
+});
+
+pb.registerShortcut('Navigate to images tab', shortcuts.navigateImagesTab, (event, state) => {
+  // @ts-ignore
+  navigate(page.tabsDict.images);
+});
+
+pb.registerShortcut('Navigate to videos tab', shortcuts.navigateVideosTab, (event, state) => {
+  // @ts-ignore
+  navigate(page.tabsDict.videos);
+});
+
+pb.registerShortcut('Navigate to maps tab', shortcuts.navigateMapsTab, (event, state) => {
+  // @ts-ignore
+  navigate(page.tabsDict.maps);
+});
+
+pb.registerShortcut('Navigate to news tab', shortcuts.navigateNewsTab, (event, state) => {
+  // @ts-ignore
+  navigate(page.tabsDict.news);
+});
+
+pb.registerShortcut('Navigate to shopping tab', shortcuts.navigateShoppingTab, (event, state) => {
+  // @ts-ignore
+  navigate(page.tabsDict.shopping);
 });
 
 let plugin = pb.build();
