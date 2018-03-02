@@ -62,7 +62,8 @@ export class Plugin {
       let MDS = s.keys.map(key => { return {default: [key]}; });
       return {
         name: s.name,
-        keys: MDS
+        keys: MDS,
+        action: s.action
       };
     });
   }

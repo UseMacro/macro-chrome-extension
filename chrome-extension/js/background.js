@@ -125,20 +125,26 @@ function mergeData(shortcuts, plugin) {
   return shortcuts;
 }
 
-function initPlugin(plugin) {
-  let data = [];
-  plugin.default.getShortcutsMDS().forEach((shortcut) => {
-    data.push({
-      keys: shortcut.keys,
-      action: shortcut.action.toString()
-    });
-  });
-  chrome.tabs.executeScript({ code: 'var plugins = ' + JSON.stringify(data) + ';' }, () => {
-    chrome.tabs.executeScript({ file: 'plugins.js' })
-  });
-}
+// Not sure what this was supposed to do, plugins.js doesn't exist
+// function initPlugin(plugin) {
+//   let data = [];
+//   plugin.default.getShortcutsMDS().forEach((shortcut) => {
+//     data.push({
+//       keys: shortcut.keys,
+//       action: shortcut.action.toString()
+//     });
+//   });
+//   chrome.tabs.executeScript({ code: 'var plugins = ' + JSON.stringify(data) + ';' }, () => {
+//     chrome.tabs.executeScript({ file: 'plugins.js' }, _=>{
+//       let e = chrome.runtime.lastError;
+//       if (e !== undefined) {
+//         console.log('wtf', _, e);
+//       }
+//     });
+//   });
+// }
 
-function initShortcuts(url, renderPanel) {
+function initShortcuts(url, callback) {
   let plugin = getPlugin(url);
   tracker.sendEvent('shortcuts', 'initialized', plugin.default.pluginName);
   if (plugin) {
@@ -147,49 +153,46 @@ function initShortcuts(url, renderPanel) {
     getShortcutData(key, (shortcuts) => {
       let data = mergeData(shortcuts, plugin);
       save(key, data);
-      renderPanel(data);
+      callback(data);
     });
-    initPlugin(plugin);
+    // initPlugin(plugin);
   } else {
     // failure handler: if no plugins, use MD shortcuts, cache & render
     let key = getShortcutsDataPath(url);
     getShortcutData(key, (shortcuts) => {
       save(key, shortcuts);
-      renderPanel(shortcuts);
+      callback(shortcuts);
     });
   }
 }
 
-function togglePopup(data) {
+function initPanel(data) {
   if (data.sections.length > 0) {
     chrome.tabs.executeScript({ code: 'var data = ' + JSON.stringify(data) + ';' }, () => {
       tracker.sendEvent('popup', 'script-executed', data.name);
-      chrome.tabs.executeScript({ file: 'init.js' })
+      chrome.tabs.executeScript({ file: 'createPanel.js' })
     });
   }
+}
+
+function loadPanel() {
+  getCurrentTabUrl((url) => {
+    let key = getShortcutsDataPath(url);
+    get(key, (data) => {
+      if (isEmpty(data) || true) {
+        initShortcuts(url, (shortcutData) => {
+           initPanel(shortcutData);
+        });
+      } else {
+        initPanel(data);
+      }
+    });
+  });
 }
 
 function isEmpty(obj) {
   return obj == null || (Object.keys(obj).length === 0 && obj.constructor === Object)
 }
-
-chrome.commands.onCommand.addListener((command) => {
-  if (command === 'toggle-popup') {
-    getCurrentTabUrl((url) => {
-      let key = getShortcutsDataPath(url);
-      tracker.sendEvent('popup', 'toggled', key);
-      get(key, (data) => {
-        if (isEmpty(data)) {
-          initShortcuts(url, (shortcutData) => {
-            togglePopup(shortcutData);
-          });
-        } else {
-          togglePopup(data);
-        }
-      });
-    });
-  }
-});
 
 chrome.webNavigation.onCompleted.addListener((details) => {
   // 0 indicates the navigation happens in the tab content window
@@ -197,6 +200,7 @@ chrome.webNavigation.onCompleted.addListener((details) => {
   if (details.frameId === 0) {
     let plugin = getPlugin(details.url);
     if (plugin) {
+      loadPanel();
       let pluginName = plugin.default.pluginName;
       chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
         chrome.tabs.insertCSS(details.tabId, { file: pluginName + '.css' }, () => {});
@@ -206,11 +210,12 @@ chrome.webNavigation.onCompleted.addListener((details) => {
   }
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.hasOwnProperty('url')) {
-    initShortcuts(tab.url, () => {});
-  }
-});
+// Do we still need this?
+// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+//   if (changeInfo.hasOwnProperty('url')) {
+//     initShortcuts(tab.url, () => {});
+//   }
+// });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.logEvent) {

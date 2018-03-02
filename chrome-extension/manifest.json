@@ -24,12 +24,5 @@
         "*://*/*"
     ],
     "content_security_policy": "script-src 'self' https://www.google-analytics.com 'unsafe-eval'; object-src 'self'",
-    "commands": {
-        "toggle-popup": {
-            "suggested_key": {
-                "default": "Alt+A"
-            },
-            "description": "Toggle Popup"
-        }
-    }
+    "commands": {}
 }
