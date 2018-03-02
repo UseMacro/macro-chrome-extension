@@ -27,8 +27,7 @@
     "commands": {
         "toggle-popup": {
             "suggested_key": {
-                "default": "Ctrl+Shift+Y",
-                "mac": "Command+Shift+Y"
+                "default": "Alt+A"
             },
             "description": "Toggle Popup"
         }

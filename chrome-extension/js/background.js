@@ -89,7 +89,7 @@ function getShortcutsDataPath(url) {
 // always calls callback: shortcuts missing from MD should not interrupt flow
 // since plugins may exist
 function getShortcutData(key, callback) {
-  let dummy = {name: 'Shortcuts', sections: []};
+  let dummy = {name: '', sections: []};
   let xhr = new XMLHttpRequest();
   xhr.open('GET', key, true);
   xhr.onload = (e) => {
@@ -112,11 +112,14 @@ function getShortcutData(key, callback) {
 
 // Adds a plugin section to shortcuts.sections
 // only called when plugins were fetched successfully
-function mergeData(shortcuts, plugins) {
+function mergeData(shortcuts, plugin) {
+  if (!shortcuts.name) {
+    shortcuts.name = plugin.default.pluginName + ' shortcuts';
+  }
   let pluginSection = {
     name: 'Plugins',
     description: 'Shortcuts from plugins',
-    shortcuts: plugins
+    shortcuts: plugin.default.getShortcutsMDS()
   };
   shortcuts.sections.push(pluginSection);
   return shortcuts;
@@ -142,7 +145,7 @@ function initShortcuts(url, renderPanel) {
     // success handler: if got plugins, merge MD shortcuts with plugins, cache & render
     let key = getShortcutsDataPath(url);
     getShortcutData(key, (shortcuts) => {
-      let data = mergeData(shortcuts, plugin.default.getShortcutsMDS());
+      let data = mergeData(shortcuts, plugin);
       save(key, data);
       renderPanel(data);
     });
@@ -223,4 +226,3 @@ function getPlugin(url) {
   }
   return null;
 }
-

@@ -3,8 +3,8 @@ import { Plugin, PluginBuilder } from './pluginbuilder.ts';
 let shortcuts = {
   nextRow: 'option+j',
   previousRow: 'option+k',
-  nextUnreadRow: 'option+shift+j,option+shift+down',
-  previousUnreadRow: 'option+shift+k,option+shift+up',
+  nextUnreadRow: ['option+shift+j', 'option+shift+down'],
+  previousUnreadRow: ['option+shift+k', 'option+shift+up'],
   sendEmoji: 'command+enter',
   toggleInfo: 'option+\\',
   searchMessenger: 'option+\/',
