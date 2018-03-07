@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Macro",
     "description": "Macro provides a platform for web users to access, create, and distribute keyboard shortcuts for their favorite websites.",
-    "version": "1.2",
+    "version": "1.2.1",
     "icons": {
         "128": "img/icon.png"
     },
