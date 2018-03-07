@@ -114,7 +114,7 @@ function getShortcutData(key, callback) {
 // only called when plugins were fetched successfully
 function mergeData(shortcuts, plugin) {
   if (!shortcuts.name) {
-    shortcuts.name = plugin.default.pluginName + ' shortcuts';
+    shortcuts.name = plugin.default.pluginName + ' Shortcuts';
   }
   let pluginSection = {
     name: 'Plugins',

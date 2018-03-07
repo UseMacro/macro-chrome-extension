@@ -27,7 +27,7 @@ let shortcuts = {
 ///////////////////////////////////////
 let pb = new PluginBuilder();
 
-pb.setPluginName('messenger');
+pb.setPluginName('Messenger');
 pb.setUrlRegex(/^https:\/\/www.messenger.com/);
 pb.setInitialState({});
 
