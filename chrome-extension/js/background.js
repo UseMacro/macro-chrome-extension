@@ -125,25 +125,6 @@ function mergeData(shortcuts, plugin) {
   return shortcuts;
 }
 
-// Not sure what this was supposed to do, plugins.js doesn't exist
-// function initPlugin(plugin) {
-//   let data = [];
-//   plugin.default.getShortcutsMDS().forEach((shortcut) => {
-//     data.push({
-//       keys: shortcut.keys,
-//       action: shortcut.action.toString()
-//     });
-//   });
-//   chrome.tabs.executeScript({ code: 'var plugins = ' + JSON.stringify(data) + ';' }, () => {
-//     chrome.tabs.executeScript({ file: 'plugins.js' }, _=>{
-//       let e = chrome.runtime.lastError;
-//       if (e !== undefined) {
-//         console.log('wtf', _, e);
-//       }
-//     });
-//   });
-// }
-
 function initShortcuts(url, callback) {
   let plugin = getPlugin(url);
   tracker.sendEvent('shortcuts', 'initialized', plugin.default.pluginName);
@@ -210,7 +191,7 @@ chrome.webNavigation.onCompleted.addListener((details) => {
   }
 });
 
-// Do we still need this?
+// TODO: We need this if we want to render shortcuts for websites that don't have plugins
 // chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 //   if (changeInfo.hasOwnProperty('url')) {
 //     initShortcuts(tab.url, () => {});
