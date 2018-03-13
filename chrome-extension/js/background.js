@@ -160,6 +160,9 @@ function initPanel(data, show) {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (tab.url && changeInfo.hasOwnProperty('status') && changeInfo.status === 'complete') {
+    // We only want to load a content script if there is no existing content
+    // script on the client side. A handshake confirms whether there is a
+    // content script listening.
     chrome.tabs.sendMessage(tabId, { handshake: true }, (response) => {
       if (response && response.handshake) { return; }
 
