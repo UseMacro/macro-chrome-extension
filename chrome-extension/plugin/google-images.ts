@@ -136,7 +136,7 @@ let shortcuts = {
 
 let pb = new PluginBuilder();
 
-pb.setPluginName('google-images');
+pb.setPluginName('Google Images');
 pb.setUrlRegex(/^https:\/\/www.google.[a-z]{2,3}\/search\?.*&tbm=isch/);
 
 pb.setInitialState({

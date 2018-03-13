@@ -70,6 +70,10 @@ export class Plugin {
       return shortcut;
     });
   }
+
+  getFileName() : string {
+    return this.pluginName.replace(' ', '-').toLowerCase();
+  }
 }
 
 // Provides an API for third party developers to create customs plugins for a url that matches our regex

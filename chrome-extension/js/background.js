@@ -78,7 +78,7 @@ function extractRootDomain(url) {
 function getShortcutsDataPath(url) {
   let plugin = getPlugin(url);
   if (plugin) {
-    return URL_PATH.concat(plugin.default.pluginName, FILE_EXT);
+    return URL_PATH.concat(plugin.default.getFileName(), FILE_EXT);
   } else {
     // TODO: need to deprecate domain matching in favour of regex matching
     // will be difficult for shortcuts without plugins because no defined regex
@@ -178,9 +178,9 @@ function loadShortcutDataAndPanel(tab) {
     let plugin = getPlugin(tab.url);
     if (plugin) {
       loadPanel(tab, false);
-      let pluginName = plugin.default.pluginName;
-      chrome.tabs.executeScript(tab.id, { file: pluginName + '.js' }, () => {
-        chrome.tabs.insertCSS(tab.id, { file: pluginName + '.css' }, () => {});
+      let fileName = plugin.default.getFileName();
+      chrome.tabs.executeScript(tab.id, { file: fileName + '.js' }, () => {
+        chrome.tabs.insertCSS(tab.id, { file: fileName + '.css' }, () => {});
         chrome.tabs.sendMessage(tab.id, { loadShortcuts: true });
       });
     } else {
