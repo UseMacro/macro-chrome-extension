@@ -15,6 +15,8 @@ class OnboardingPopup extends Component {
   constructor(props) {
     super(props);
     this.state = {show: true};
+    this.pluginName = props.pluginName;
+    this.data = props.data;
   }
   componentDidMount() {
     this.initKeys();
@@ -39,7 +41,7 @@ class OnboardingPopup extends Component {
       <div style={styles.modal} onClick={() => this.close()}>
         <div style={[styles.dialog, this.props.style]} onClick={this.cancel}>
           <div style={styles.header}>
-            <h1>Onboarding Panel</h1>
+            <h1>Onboarding Panel for {this.pluginName} </h1>
           </div>
         </div>
       </div>
@@ -109,5 +111,5 @@ let styles = {
 
 OnboardingPopup = Radium(OnboardingPopup);
 
-ReactDOM.render(<OnboardingPopup/>, document.getElementById(ID));
+ReactDOM.render(<OnboardingPopup data={data} pluginName={pluginName}/>, document.getElementById(ID));
 

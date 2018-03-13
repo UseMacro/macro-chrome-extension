@@ -167,7 +167,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         chrome.tabs.sendMessage(tabId, { loadShortcuts: true });
       });
       setMacroIconAsActive(tabId, true);
-      initOnboardingPopupOnFirstVisit(plugin);
     } else {
       initShortcuts(tab.url, () => {});
       setMacroIconAsActive(tabId, false);
@@ -181,6 +180,8 @@ function loadPanel(url) {
     if (isEmpty(data) || true) {
       initShortcuts(url, (shortcutData) => {
         initPanel(shortcutData);
+        let plugin = getPlugin(url);
+        initOnboardingPopupOnFirstVisit(plugin, shortcutData);
       });
     } else {
       initPanel(data);
@@ -200,13 +201,16 @@ function setMacroIconAsActive(tabId, isActive) {
   }
 }
 
-function initOnboardingPopupOnFirstVisit(plugin) {
+function initOnboardingPopupOnFirstVisit(plugin, data) {
   let key = getPluginVisitedKey(plugin);
   // check chrome storage if user has visited this plugin before
-  get(key, (data) => {
-    if (data == null) {
+  get(key, (visited) => {
+    if (visited == null) {
       save(key, true);
-      chrome.tabs.executeScript({ file: 'createOnboardingPopup.js' });
+      let code = 'var data = ' + JSON.stringify(data) + ';' + 'var pluginName = "' + plugin.default.pluginName + '";';
+      chrome.tabs.executeScript({ code: code }, () => {
+        chrome.tabs.executeScript({ file: 'createOnboardingPopup.js' });
+      });
     }
   });
 }
