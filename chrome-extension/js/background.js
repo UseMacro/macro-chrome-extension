@@ -99,14 +99,13 @@ function getShortcutData(key, callback) {
         callback(json);
       } else {
         callback(dummy);
-        console.error(xhr.statusText);
       }
     }
   };
   xhr.onerror = (e) => {
     callback(dummy);
-    console.error(xhr.statusText);
   };
+  xhr.onloadend = () => {};
   xhr.send(null);
 }
 
@@ -127,8 +126,8 @@ function mergeData(shortcuts, plugin) {
 
 function initShortcuts(url, callback) {
   let plugin = getPlugin(url);
-  tracker.sendEvent('shortcuts', 'initialized', plugin.default.pluginName);
   if (plugin) {
+    tracker.sendEvent('shortcuts', 'initialized', plugin.default.pluginName);
     // success handler: if got plugins, merge MD shortcuts with plugins, cache & render
     let key = getShortcutsDataPath(url);
     getShortcutData(key, (shortcuts) => {
@@ -140,6 +139,7 @@ function initShortcuts(url, callback) {
   } else {
     // failure handler: if no plugins, use MD shortcuts, cache & render
     let key = getShortcutsDataPath(url);
+    tracker.sendEvent('shortcuts', 'initialized', key);
     getShortcutData(key, (shortcuts) => {
       save(key, shortcuts);
       callback(shortcuts);
@@ -156,44 +156,41 @@ function initPanel(data) {
   }
 }
 
-function loadPanel() {
-  getCurrentTabUrl((url) => {
-    let key = getShortcutsDataPath(url);
-    get(key, (data) => {
-      if (isEmpty(data) || true) {
-        initShortcuts(url, (shortcutData) => {
-           initPanel(shortcutData);
-        });
-      } else {
-        initPanel(data);
-      }
-    });
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (tab.url && changeInfo.hasOwnProperty('status')) {
+    let plugin = getPlugin(tab.url);
+    if (plugin) {
+      loadPanel(tab.url);
+      let pluginName = plugin.default.pluginName;
+      chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
+        chrome.tabs.insertCSS(tabId, { file: pluginName + '.css' }, () => {});
+        chrome.tabs.sendMessage(tabId, { loadShortcuts: true });
+      });
+      setMacroIconAsActive(tabId, true);
+      initOnboardingPopupOnFirstVisit(plugin);
+    } else {
+      initShortcuts(tab.url, () => {});
+      setMacroIconAsActive(tabId, false);
+    }
+  }
+});
+
+function loadPanel(url) {
+  let key = getShortcutsDataPath(url);
+  get(key, (data) => {
+    if (isEmpty(data) || true) {
+      initShortcuts(url, (shortcutData) => {
+        initPanel(shortcutData);
+      });
+    } else {
+      initPanel(data);
+    }
   });
 }
 
 function isEmpty(obj) {
   return obj == null || (Object.keys(obj).length === 0 && obj.constructor === Object)
 }
-
-chrome.webNavigation.onCompleted.addListener((details) => {
-  // 0 indicates the navigation happens in the tab content window
-  // a positive value indicates navigation in a subframe.
-  if (details.frameId === 0) {
-    let plugin = getPlugin(details.url);
-    if (plugin) {
-      loadPanel();
-      let pluginName = plugin.default.pluginName;
-      chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
-        chrome.tabs.insertCSS(details.tabId, { file: pluginName + '.css' }, () => {});
-        chrome.tabs.sendMessage(details.tabId, { loadShortcuts: true });
-      });
-      setMacroIconAsActive(details.tabId, true);
-      initOnboardingPopupOnFirstVisit(plugin);
-    } else {
-      setMacroIconAsActive(details.tabId, false);
-    }
-  }
-});
 
 function setMacroIconAsActive(tabId, isActive) {
   if (isActive) {
@@ -217,13 +214,6 @@ function initOnboardingPopupOnFirstVisit(plugin) {
 function getPluginVisitedKey(plugin) {
   return plugin.default.pluginName + '_visited';
 }
-
-// TODO: We need this if we want to render shortcuts for websites that don't have plugins
-// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-//   if (changeInfo.hasOwnProperty('url')) {
-//     initShortcuts(tab.url, () => {});
-//   }
-// });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.logEvent) {
