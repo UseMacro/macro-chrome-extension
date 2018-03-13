@@ -265,7 +265,7 @@ function navigate(link) {
   if (link) location.href = link.href;
 }
 
-pb.registerShortcut('Highlight Search Input', shortcuts.highlightSearchInput, (event, state) => {
+pb.registerShortcut('Jump to search input', shortcuts.highlightSearchInput, (event, state) => {
   if (getSearchInput() === document.activeElement) return;
 
   let searchInput = getSearchInput();
