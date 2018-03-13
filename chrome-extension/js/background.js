@@ -159,26 +159,30 @@ function initPanel(data, show) {
 }
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (tab.url && changeInfo.hasOwnProperty('status')) {
-    let plugin = getPlugin(tab.url);
-    if (plugin) {
-      loadPanel(tab.url, false);
-      let pluginName = plugin.default.pluginName;
-      chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
-        chrome.tabs.insertCSS(tabId, { file: pluginName + '.css' }, () => {});
-        chrome.tabs.sendMessage(tabId, { loadShortcuts: true });
-      });
-      setMacroIconAsActive(tabId, true);
-    } else {
-      initShortcuts(tab.url, (data) => {
-        if (data.notFound === true) {
-          setMacroIconAsActive(tabId, false);
-        } else {
-          setMacroIconAsActive(tabId, true);
-          loadPanel(tab.url, false);
-        }
-      });
-    }
+  if (tab.url && changeInfo.hasOwnProperty('status') && changeInfo.status === 'complete') {
+    chrome.tabs.sendMessage(tabId, { handshake: true }, (response) => {
+      if (response && response.handshake) { return; }
+
+      let plugin = getPlugin(tab.url);
+      if (plugin) {
+        loadPanel(tab.url, false);
+        let pluginName = plugin.default.pluginName;
+        chrome.tabs.executeScript({ file: pluginName + '.js' }, () => {
+          chrome.tabs.insertCSS(tabId, { file: pluginName + '.css' }, () => {});
+          chrome.tabs.sendMessage(tabId, { loadShortcuts: true });
+        });
+        setMacroIconAsActive(tabId, true);
+      } else {
+        initShortcuts(tab.url, (data) => {
+          if (data.notFound === true) {
+            setMacroIconAsActive(tabId, false);
+          } else {
+            setMacroIconAsActive(tabId, true);
+            loadPanel(tab.url, false);
+          }
+        });
+      }
+    });
   }
 });
 
