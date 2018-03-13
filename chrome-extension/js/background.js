@@ -192,7 +192,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 function loadPanel(url, show) {
   let key = getShortcutsDataPath(url);
   get(key, (data) => {
-    if (isEmpty(data) || true) {
+    if (isEmpty(data)) {
       initShortcuts(url, (shortcutData) => {
         initPanel(shortcutData, show);
         initOnboardingPopupOnFirstVisit(url, shortcutData);
