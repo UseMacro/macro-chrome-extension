@@ -22,6 +22,7 @@
     "@types/chrome": "^0.0.58",
     "extract-text-webpack-plugin": "^3.0.2",
     "keymaster": "^1.6.2",
+    "radium": "^0.22.1",
     "typings-for-css-modules-loader": "^1.7.0"
   }
 }
