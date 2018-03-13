@@ -186,6 +186,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         });
       }
     });
+  } else if (changeInfo.hasOwnProperty('status') && changeInfo.status === 'loading') {
+    // Prevent icon from flashing as active when reloading page
+    checkIfIconShouldBeActive(tab);
   }
 });
 
@@ -257,18 +260,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 chrome.tabs.onActivated.addListener(activeInfo => {
-  getCurrentTab(tab => {
-    let plugin = getPlugin(tab.url);
-    if (plugin) {
-      setMacroIconAsActive(tab.id, true);
-    } else {
-      let key = getShortcutsDataPath(tab.url);
-      getShortcutData(key, (data) => {
-        setMacroIconAsActive(tab.id, data.notFound !== true);
-      });
-    }
-  });
+  chrome.tabs.get(activeInfo.tabId, checkIfIconShouldBeActive);
 });
+
+function checkIfIconShouldBeActive(tab) {
+  let plugin = getPlugin(tab.url);
+  if (plugin) {
+    setMacroIconAsActive(tab.id, true);
+  } else {
+    let key = getShortcutsDataPath(tab.url);
+    getShortcutData(key, (data) => {
+      setMacroIconAsActive(tab.id, data.notFound !== true);
+    });
+  }
+}
 
 function getPlugin(url) {
   for (let plugin of Plugins) {
