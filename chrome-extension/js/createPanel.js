@@ -9,4 +9,4 @@ if (!document.getElementById(ID)) {
   macro.setAttribute('id', ID);
   document.body.appendChild(macro);
 }
-ReactDOM.render(<Panel data={data} />, document.getElementById(ID));
+ReactDOM.render(<Panel data={data} show={show}/>, document.getElementById(ID));
