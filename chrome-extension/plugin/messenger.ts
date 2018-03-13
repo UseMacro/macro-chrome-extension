@@ -7,7 +7,7 @@ let shortcuts = {
   previousUnreadRow: ['option+shift+k', 'option+shift+up'],
   sendEmoji: 'command+enter',
   toggleInfo: 'option+\\',
-  searchMessenger: 'option+\/',
+  searchMessenger: 'option+s',
   messageInput: 'escape',
   composeMessage: 'option+c',
   searchConversation: 'option+f',
@@ -232,14 +232,12 @@ function viewChat(i, event, state) {
 pb.registerShortcut('View first chat', shortcuts.firstChat, viewChat.bind(this, 0));
 pb.registerShortcut('View second chat', shortcuts.secondChat, viewChat.bind(this, 1));
 pb.registerShortcut('View third chat', shortcuts.thirdChat, viewChat.bind(this, 2));
-pb.registerShortcut('View fourth chat', shortcuts.fourthChat, viewChat.bind(this, 3));
-pb.registerShortcut('View fifth chat', shortcuts.fifthChat, viewChat.bind(this, 4));
-pb.registerShortcut('View sixth chat', shortcuts.sixthChat, viewChat.bind(this, 5));
-pb.registerShortcut('View seventh chat', shortcuts.seventhChat, viewChat.bind(this, 6));
-pb.registerShortcut('View eighth chat', shortcuts.eighthChat, viewChat.bind(this, 7));
-pb.registerShortcut('View ninth chat', shortcuts.ninthChat, viewChat.bind(this, 8));
-
-
+pb.registerShortcut('View fourth chat', shortcuts.fourthChat, viewChat.bind(this, 3), { showInPanel: false });
+pb.registerShortcut('View fifth chat', shortcuts.fifthChat, viewChat.bind(this, 4), { showInPanel: false });
+pb.registerShortcut('View sixth chat', shortcuts.sixthChat, viewChat.bind(this, 5), { showInPanel: false });
+pb.registerShortcut('View seventh chat', shortcuts.seventhChat, viewChat.bind(this, 6), { showInPanel: false });
+pb.registerShortcut('View eighth chat', shortcuts.eighthChat, viewChat.bind(this, 7), { showInPanel: false });
+pb.registerShortcut('View ninth chat', shortcuts.ninthChat, viewChat.bind(this, 8), { showInPanel: false });
 
 let plugin = pb.build();
 export default plugin;

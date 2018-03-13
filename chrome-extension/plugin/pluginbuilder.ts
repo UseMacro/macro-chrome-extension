@@ -58,29 +58,16 @@ export class Plugin {
   // MDS getter for frontend
   // returns a list of shortcut objects in MDS
   getShortcutsMDS() : object[] {
-    return this.shortcuts.map(s => {
-      let MDS = s.keys.map(key => { return {default: [key]}; });
-      return {
-        name: s.name,
-        keys: MDS,
-        action: s.action
-      };
+    return this.shortcuts.filter((s) => {
+      return s.showInPanel;
+    }).map((s) => {
+      // clone shortcut to not affect the underlying data
+      let shortcut = JSON.parse(JSON.stringify(s));
+      delete shortcut.showInPanel;
+      shortcut.keys = s.keys.map(key => { return {default: [key]}; });
+      return shortcut;
     });
   }
-
-  listShortcuts() : any[] {
-    // Only include name and keys
-    return this.shortcuts.map((s) => {
-      return {
-        name: s.name,
-        keys: s.keys
-      };
-    });
-  }
-
-  // getShortcut(name: string) : any {
-  //   return this.shortcuts[name];
-  // }
 }
 
 // Provides an API for third party developers to create customs plugins for a url that matches our regex
@@ -100,7 +87,8 @@ export class PluginBuilder {
   // TODO: Handle scopes from keymaster
   registerShortcut(name: string,
                    keys: string | string[],
-                   action: Function) : void {
+                   action: Function,
+                   options?: any) : void {
     if (!name) {
       throw 'Must include a name.';
     }
@@ -111,7 +99,12 @@ export class PluginBuilder {
 
     let config = {
       keys: keys,
-      action: action
+      action: action,
+      showInPanel: true
+    }
+
+    if (options && !options.showInPanel) {
+      config.showInPanel = false;
     }
 
     this.validateConfig(config);
@@ -127,10 +120,6 @@ export class PluginBuilder {
   }
 
   validateConfig(config: any) : boolean {
-    // Structure: {
-    //   'keys': string[],
-    //   'action': <function Function>
-    // }
 
     // Validate keys
     if (config.keys.constructor !== Array) {
@@ -167,7 +156,8 @@ export class PluginBuilder {
       shortcuts.push({
         name: name,
         keys: this.shortcuts[name].keys,
-        action: this.shortcuts[name].action
+        action: this.shortcuts[name].action,
+        showInPanel: this.shortcuts[name].showInPanel
       });
     }
 
