@@ -41,9 +41,18 @@ class OnboardingPopup extends Component {
   cancel(e) {
     e.stopPropagation();
   }
+  // inclusive range
+  randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
   render() {
-    let shortcutHint1 = this.props.data.sections[0].shortcuts[0];
-    let shortcutHint2 = this.props.data.sections[0].shortcuts[1];
+    let sectionIndex1 = this.props.first ? 0 : this.randInt(0, this.props.data.sections.length - 1);
+    let shortcutIndex1 = this.props.first ? 0 : this.randInt(0, this.props.data.sections[sectionIndex1].shortcuts.length - 1);
+    let sectionIndex2 = this.props.first ? 0 : this.randInt(0, this.props.data.sections.length - 1);
+    let shortcutIndex2 = this.props.first ? 1 : this.randInt(0, this.props.data.sections[sectionIndex2].shortcuts.length - 1);
+    let shortcutHint1 = this.props.data.sections[sectionIndex1].shortcuts[shortcutIndex1];
+    let shortcutHint2 = this.props.data.sections[sectionIndex2].shortcuts[shortcutIndex2];
+
     return this.state.show ? <div style={styles.container} onClick={() => this.close()}>
       <div style={styles.pointer}/>
       <div style={styles.popup} onClick={this.cancel}>
@@ -114,10 +123,7 @@ let styles = {
     border: '1px solid #DDD',
     cursor: 'pointer',
     fontWeight: '700',
-    fontSize: '11px',
-    ':hover': {
-      color: '#2391E1'
-    }
+    fontSize: '11px'
   },
   footer: {
     display: 'flex',
@@ -142,10 +148,10 @@ let styles = {
     borderLeft: '10px solid transparent',
     borderRight: '10px solid transparent',
     borderBottom: '10px solid #F7FCFF',
-    zIndex: '300'
+    zIndex: '9200'
   },
 }
 
 OnboardingPopup = Radium(OnboardingPopup);
 
-ReactDOM.render(<OnboardingPopup data={data} name={name}/>, document.getElementById(ID));
+ReactDOM.render(<OnboardingPopup data={data} name={name} first={first}/>, document.getElementById(ID));

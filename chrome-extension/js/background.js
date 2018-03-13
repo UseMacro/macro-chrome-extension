@@ -213,7 +213,7 @@ chrome.browserAction.onClicked.addListener(tab => {
   let key = getShortcutsDataPath(tab.url);
   get(key, (data) => {
     if (data.sections.length > 0) {
-      showOnboardingPopup(tab, data);
+      showOnboardingPopup(tab, data, false);
     }
   });
 });
@@ -236,12 +236,12 @@ function initOnboardingPopupOnFirstVisit(tab, data) {
   get(key, (visited) => {
     if (visited == null) {
       save(key, true);
-      showOnboardingPopup(tab, data)
+      showOnboardingPopup(tab, data, true)
     }
   });
 }
 
-function showOnboardingPopup(tab, data) {
+function showOnboardingPopup(tab, data, first) {
   let plugin = getPlugin(tab.url);
   if (plugin) {
     var name = plugin.default.pluginName;
@@ -249,7 +249,7 @@ function showOnboardingPopup(tab, data) {
     var name = extractRootDomain(tab.url);
   }
 
-  let code = 'var data = ' + JSON.stringify(data) + ';' + 'var name = "' + name + '";' + 'var icon = "' + chrome.extension.getURL('img/icon.png')+ '";';
+  let code = 'var data = ' + JSON.stringify(data) + ';' + 'var name = "' + name + '";' + 'var icon = "' + chrome.extension.getURL('img/icon.png') + '";' + 'var first = ' + first + ';';
   chrome.tabs.executeScript({ code: code }, () => {
     chrome.tabs.executeScript({ file: 'createOnboardingPopup.js' });
   });
