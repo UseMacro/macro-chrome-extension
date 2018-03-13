@@ -3,6 +3,14 @@ import Radium from 'radium';
 import ReactDOM from 'react-dom';
 import key from 'keymaster';
 
+import WebFont from 'webfontloader';
+
+WebFont.load({
+  google: {
+    families: ['Overpass:400,700']
+  }
+});
+
 const ID = 'macro-onboarding-popup-wrapper';
 
 if (!document.getElementById(ID)) {
@@ -27,9 +35,6 @@ class OnboardingPopup extends Component {
       this.close();
     });
   }
-  toggle() {
-    this.setState({show: this.state.show ? false : true});
-  }
   close() {
     this.setState({show: false});
   }
@@ -37,11 +42,21 @@ class OnboardingPopup extends Component {
     e.stopPropagation();
   }
   render() {
-    return this.state.show ? <div style={styles.container}>
-      <div style={styles.modal} onClick={() => this.close()}>
-        <div style={[styles.dialog, this.props.style]} onClick={this.cancel}>
-          <div style={styles.header}>
-            <h1>Onboarding Panel for {this.name} </h1>
+    let shortcutHint1 = this.props.data.sections[0].shortcuts[0];
+    let shortcutHint2 = this.props.data.sections[0].shortcuts[1];
+    return this.state.show ? <div style={styles.container} onClick={() => this.close()}>
+      <div style={styles.pointer}/>
+      <div style={styles.popup} onClick={this.cancel}>
+        <p style={[styles.reset, styles.primary, {marginTop: '10px'}]}>Press {shortcutHint1.keys[0].default} to {shortcutHint1.name.toLowerCase()}.</p>
+        <p style={[styles.reset, styles.primary]}>Press {shortcutHint2.keys[0].default} to {shortcutHint2.name.toLowerCase()}.</p>
+        <p style={styles.secondary}>Discover more {this.name} shortcuts by pressing Alt+/ or by clicking the Macro icon.</p>
+        <div style={styles.footer}>
+          <div style={styles.button} onClick={() => this.close()}>
+            <p style={[styles.reset, styles.secondary]}>GOT IT</p>
+          </div>
+          <div style={styles.plug}>
+            <p style={[styles.reset, styles.tertiary]}>POWERED BY</p>
+            <img style={styles.icon} src={icon}/>
           </div>
         </div>
       </div>
@@ -50,66 +65,86 @@ class OnboardingPopup extends Component {
 }
 
 let styles = {
+  reset: {
+    marginTop: '0',
+    marginRight: '0',
+    marginBottom: '0',
+    marginLeft: '0'
+  },
+  primary: {
+    fontWeight: '700'
+  },
+  secondary: {
+    color: '#888'
+  },
+  tertiary: {
+    color: '#BBB',
+    fontSize: '9px',
+    paddingTop: '3px'
+  },
   container: {
     position: 'fixed',
-    zIndex: '9000',
+    zIndex: '1000',
     width: '100%',
     height: '100%',
     top: '0',
     left: '0',
     right: '0',
-    bottom: '0'
+    bottom: '0',
+    fontFamily: 'Overpass',
+    fontSize: '12px',
+    lineHeight: '1.5'
   },
-  overlay: {
-    opacity: '0.2',
-    position: 'fixed',
-    backgroundColor: '#000000',
-    zIndex: '7000',
-    top: '0',
-    left: '0',
-    right: '0',
-    bottom: '0'
-  },
-  modal: {
-    display: 'block',
+  popup: {
     position: 'absolute',
-    zIndex: '8000',
-    outline: '0',
-    top: '0',
-    left: '0',
-    right: '0',
-    bottom: '0'
+    top: '10px',
+    right: '30px',
+    backgroundColor: '#F7FCFF',
+    width: '250px',
+    padding: '15px',
+    boxShadow: '1px 3px 7px rgba(0, 0, 0, 0.3)',
+    borderRadius: '2px'
   },
-  dialog: {
-    width: '600px',
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.5)',
-    outline: '0',
-    backgroundColor: '#FFFFFF',
-    padding: '20px',
-    maxHeight: '90vh',
-    overflowY: 'scroll',
-    borderRadius: '15px'
+  button: {
+    backgroundColor: '#FFF',
+    padding: '3px 15px',
+    color: '#AAA',
+    borderRadius: '3px',
+    border: '1px solid #DDD',
+    cursor: 'pointer',
+    fontWeight: '700',
+    fontSize: '11px',
+    ':hover': {
+      color: '#2391E1'
+    }
   },
-  header: {
+  footer: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '5px',
-    paddingLeft: '15px'
+    alignItems: 'center',
+    marginTop: '15px'
   },
-  body: {
-    display: 'flex',
-    justifyContent: 'space-around'
+  plug: {
+    display: 'flex'
   },
-  col: {
-    width: '45%'
-  }
+  icon: {
+    width: '20px',
+    height: '20px',
+    marginLeft: '7px'
+  },
+  pointer: {
+    width: '0',
+    height: '0',
+    position: 'absolute',
+    top: '2px',
+    right: '35px',
+    borderLeft: '10px solid transparent',
+    borderRight: '10px solid transparent',
+    borderBottom: '10px solid #F7FCFF',
+    zIndex: '300'
+  },
 }
 
 OnboardingPopup = Radium(OnboardingPopup);
 
 ReactDOM.render(<OnboardingPopup data={data} name={name}/>, document.getElementById(ID));
-

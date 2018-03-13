@@ -24,6 +24,7 @@
     "keymaster": "^1.6.2",
     "radium": "^0.22.1",
     "ssri": "^5.3.0",
-    "typings-for-css-modules-loader": "^1.7.0"
+    "typings-for-css-modules-loader": "^1.7.0",
+    "webfontloader": "^1.6.28"
   }
 }

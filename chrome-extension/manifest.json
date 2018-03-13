@@ -23,5 +23,8 @@
         "*://*/*"
     ],
     "content_security_policy": "script-src 'self' https://www.google-analytics.com 'unsafe-eval'; object-src 'self'",
-    "commands": {}
+    "commands": {},
+    "web_accessible_resources": [
+      "img/*.png"
+    ]
 }

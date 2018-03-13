@@ -243,9 +243,9 @@ function initOnboardingPopupOnFirstVisit(tab, data) {
         var name = extractRootDomain(tab.url);
       }
 
-      let code = 'var data = ' + JSON.stringify(data) + ';' + 'var name = "' + name + '";';
-      chrome.tabs.executeScript(tab.id, { code: code }, () => {
-        chrome.tabs.executeScript(tab.id, { file: 'createOnboardingPopup.js' });
+      let code = 'var data = ' + JSON.stringify(data) + ';' + 'var name = "' + name + '";' + 'var icon = "' + chrome.extension.getURL('img/icon.png')+ '";';
+      chrome.tabs.executeScript({ code: code }, () => {
+        chrome.tabs.executeScript({ file: 'createOnboardingPopup.js' });
       });
     }
   });
