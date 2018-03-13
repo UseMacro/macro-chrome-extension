@@ -209,18 +209,13 @@ function initOnboardingPopupOnFirstVisit(plugin) {
   get(key, (data) => {
     if (data == null) {
       save(key, true);
-      showOnboardingPopup(plugin);
+      chrome.tabs.executeScript({ file: 'createOnboardingPopup.js' });
     }
   });
 }
 
 function getPluginVisitedKey(plugin) {
   return plugin.default.pluginName + '_visited';
-}
-
-function showOnboardingPopup(plugin) {
-  // TODO: Show onboarding panel similar to how we render shortcuts panel
-  console.log("Show onboarding popup")
 }
 
 // TODO: We need this if we want to render shortcuts for websites that don't have plugins

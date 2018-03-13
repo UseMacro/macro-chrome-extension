@@ -36,6 +36,7 @@ var options = {
     background: path.join(__dirname, "chrome-extension", "js", "background.js"),
     analytics: path.join(__dirname, "chrome-extension", "js", "analytics.js"),
     createPanel: path.join(__dirname, "chrome-extension", "js", "createPanel.js"),
+    createOnboardingPopup: path.join(__dirname, "chrome-extension", "js", "createOnboardingPopup.js")
   },
 
   // All file outputs from webpack will be under the 'build/' directory.
@@ -84,7 +85,10 @@ var options = {
       {
         // Handles compiling React, ES7, ES6
         test: /\.jsx?$/,
-        include: path.join(__dirname, "chrome-extension", "js", "createPanel.js"),
+        include: [
+          path.join(__dirname, "chrome-extension", "js", "createPanel.js"),
+          path.join(__dirname, "chrome-extension", "js", "createOnboardingPopup.js")
+        ],
         loader: "babel-loader"
       }
     ]
