@@ -4,12 +4,13 @@ import ReactDOM from 'react-dom';
 import key from 'keymaster';
 
 import WebFont from 'webfontloader';
-
-WebFont.load({
-  google: {
-    families: ['Overpass:400,700']
-  }
-});
+if (first) {
+  WebFont.load({
+    google: {
+      families: ['Overpass:400,700']
+    }
+  });
+}
 
 const ID = 'macro-onboarding-popup-wrapper';
 
@@ -28,6 +29,9 @@ class OnboardingPopup extends Component {
   }
   componentDidMount() {
     this.initKeys();
+  }
+  componentWillUnmount() {
+    key.unbind('escape');
   }
   initKeys() {
     key.filter = (event) => true;
