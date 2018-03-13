@@ -8,7 +8,8 @@ This is an upcoming feature for Macro. Support for new plugins will be added as 
 
 ## Local Development 
 ### Getting Started
-`webpack --watch`
+1. `yarn install`
+2. `webpack --watch`
 
 ## Shortcut configuration file
 
