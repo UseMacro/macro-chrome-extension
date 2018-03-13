@@ -213,7 +213,7 @@ chrome.browserAction.onClicked.addListener(tab => {
   let key = getShortcutsDataPath(tab.url);
   get(key, (data) => {
     if (data.sections.length > 0) {
-      loadPanel(tab, true);
+      showOnboardingPopup(tab, data);
     }
   });
 });
@@ -236,18 +236,22 @@ function initOnboardingPopupOnFirstVisit(tab, data) {
   get(key, (visited) => {
     if (visited == null) {
       save(key, true);
-      let plugin = getPlugin(tab.url);
-      if (plugin) {
-        var name = plugin.default.pluginName;
-      } else {
-        var name = extractRootDomain(tab.url);
-      }
-
-      let code = 'var data = ' + JSON.stringify(data) + ';' + 'var name = "' + name + '";' + 'var icon = "' + chrome.extension.getURL('img/icon.png')+ '";';
-      chrome.tabs.executeScript({ code: code }, () => {
-        chrome.tabs.executeScript({ file: 'createOnboardingPopup.js' });
-      });
+      showOnboardingPopup(tab, data)
     }
+  });
+}
+
+function showOnboardingPopup(tab, data) {
+  let plugin = getPlugin(tab.url);
+  if (plugin) {
+    var name = plugin.default.pluginName;
+  } else {
+    var name = extractRootDomain(tab.url);
+  }
+
+  let code = 'var data = ' + JSON.stringify(data) + ';' + 'var name = "' + name + '";' + 'var icon = "' + chrome.extension.getURL('img/icon.png')+ '";';
+  chrome.tabs.executeScript({ code: code }, () => {
+    chrome.tabs.executeScript({ file: 'createOnboardingPopup.js' });
   });
 }
 
