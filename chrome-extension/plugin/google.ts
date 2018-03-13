@@ -85,20 +85,19 @@ function clearHighlights(page) {
 let page = new GooglePage();
 
 let shortcuts = {
-  nextLink: 'j',
-  previousLink: 'k',
-  openLink: 'enter',
+  nextLink: 'alt+j',
+  previousLink: 'alt+k',
+  openLink: 'alt+enter',
   openLinkNewTab: 'command+enter',
-  nextPage: 'l',
-  previousPage: 'h',
-  focusSearchInput: '/',
+  nextPage: 'alt+l',
+  previousPage: 'alt+h',
   highlightSearchInput: 'command+/',
-  navigateAllTab: 'a',
-  navigateImagesTab: 'i',
-  navigateVideosTab: 'v',
-  navigateMapsTab: 'm',
-  navigateNewsTab: 'n',
-  navigateShoppingTab: 's',
+  navigateAllTab: 'alt+a',
+  navigateImagesTab: 'alt+i',
+  navigateVideosTab: 'alt+v',
+  navigateMapsTab: 'alt+m',
+  navigateNewsTab: 'alt+n',
+  navigateShoppingTab: 'alt+s',
 };
 
 ///////////////////////
@@ -117,21 +116,6 @@ function incrementIndex(state, val) {
   state.set({ linkIndex: nextIndex });
 }
 
-pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
-  if (getSearchInput() === document.activeElement) return;
-  clearHighlights(page);
-  incrementIndex(state, 1);
-  updateFocusedLinkAtIndex(state.linkIndex);
-});
-
-pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
-  if (getSearchInput() === document.activeElement) return;
-
-  clearHighlights(page);
-  incrementIndex(state, -1);
-  updateFocusedLinkAtIndex(state.linkIndex);
-});
-
 function navigate(link) {
   if (link) location.href = link.href;
 }
@@ -149,6 +133,21 @@ pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, st
   window.open(link.href, '_blank');
 });
 
+pb.registerShortcut('Next link', shortcuts.nextLink, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+  clearHighlights(page);
+  incrementIndex(state, 1);
+  updateFocusedLinkAtIndex(state.linkIndex);
+});
+
+pb.registerShortcut('Previous link', shortcuts.previousLink, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
+  clearHighlights(page);
+  incrementIndex(state, -1);
+  updateFocusedLinkAtIndex(state.linkIndex);
+});
+
 pb.registerShortcut('Next page', shortcuts.nextPage, (event, state) => {
   if (getSearchInput() === document.activeElement) return;
   navigate(page.getNextPage());
@@ -159,24 +158,7 @@ pb.registerShortcut('Previous page', shortcuts.previousPage, (event, state) => {
   navigate(page.getPreviousPage());
 });
 
-pb.registerShortcut('Focus on Search Input', shortcuts.focusSearchInput, (event, state) => {
-  if (getSearchInput() === document.activeElement) return;
-
-  let searchInput = getSearchInput();
-  searchInput.focus();
-  event.preventDefault();
-  event.stopPropagation();
-
-  // Always move cursor to the back
-  // @ts-ignore
-  let val = searchInput.value;
-  // @ts-ignore
-  searchInput.value = '';
-  // @ts-ignore
-  searchInput.value = val;
-});
-
-pb.registerShortcut('Highlight Search Input', shortcuts.highlightSearchInput, (event, state) => {
+pb.registerShortcut('Jump to search input', shortcuts.highlightSearchInput, (event, state) => {
   if (getSearchInput() === document.activeElement) return;
 
   let searchInput = getSearchInput();
