@@ -187,9 +187,41 @@ chrome.webNavigation.onCompleted.addListener((details) => {
         chrome.tabs.insertCSS(details.tabId, { file: pluginName + '.css' }, () => {});
         chrome.tabs.sendMessage(details.tabId, { loadShortcuts: true });
       });
+      setMacroIconAsActive(details.tabId, true);
+      initOnboardingPopupOnFirstVisit(plugin);
+    } else {
+      setMacroIconAsActive(details.tabId, false);
     }
   }
 });
+
+function setMacroIconAsActive(tabId, isActive) {
+  if (isActive) {
+    chrome.browserAction.setIcon({path: 'img/icon.png', tabId: tabId});
+  } else {
+    chrome.browserAction.setIcon({path: 'img/icon_inactive.png', tabId: tabId});
+  }
+}
+
+function initOnboardingPopupOnFirstVisit(plugin) {
+  let key = getPluginVisitedKey(plugin);
+  // check chrome storage if user has visited this plugin before
+  get(key, (data) => {
+    if (data == null) {
+      save(key, true);
+      showOnboardingPopup(plugin);
+    }
+  });
+}
+
+function getPluginVisitedKey(plugin) {
+  return plugin.default.pluginName + '_visited';
+}
+
+function showOnboardingPopup(plugin) {
+  // TODO: Show onboarding panel similar to how we render shortcuts panel
+  console.log("Show onboarding popup")
+}
 
 // TODO: We need this if we want to render shortcuts for websites that don't have plugins
 // chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
