@@ -140,6 +140,12 @@ function triggerMouseEvent(node, eventType) {
 
 let page = new MessengerPage();
 
+pb.registerShortcut('Send emoji', shortcuts.sendEmoji, (event, state) => {
+  triggerMouseEvent(page.getEmojiElement(), 'click');
+  event.preventDefault();
+  event.stopPropagation();
+});
+
 pb.registerShortcut('Next chat', shortcuts.nextRow, (event, state) => {
   let nextRomElem = page.getNextRowLink();
   if (nextRomElem) {
@@ -170,20 +176,23 @@ pb.registerShortcut('Previous unread chat', shortcuts.previousUnreadRow, (event,
   event.stopPropagation();
 });
 
-pb.registerShortcut('Send emoji', shortcuts.sendEmoji, (event, state) => {
-  triggerMouseEvent(page.getEmojiElement(), 'click');
+function viewChat(i, event, state) {
+  triggerMouseEvent(page.getRow(i), 'click');
   event.preventDefault();
   event.stopPropagation();
-});
+}
 
-pb.registerShortcut('Toggle Conversation Information', shortcuts.toggleInfo, (event, state) => {
-  triggerMouseEvent(page.getConversationInfo(), 'click');
-  event.preventDefault();
-  event.stopPropagation();
-});
+pb.registerShortcut('View first chat', shortcuts.firstChat, viewChat.bind(this, 0));
+pb.registerShortcut('View second chat', shortcuts.secondChat, viewChat.bind(this, 1));
+pb.registerShortcut('View third chat', shortcuts.thirdChat, viewChat.bind(this, 2));
+pb.registerShortcut('View fourth chat', shortcuts.fourthChat, viewChat.bind(this, 3), { showInPanel: false });
+pb.registerShortcut('View fifth chat', shortcuts.fifthChat, viewChat.bind(this, 4), { showInPanel: false });
+pb.registerShortcut('View sixth chat', shortcuts.sixthChat, viewChat.bind(this, 5), { showInPanel: false });
+pb.registerShortcut('View seventh chat', shortcuts.seventhChat, viewChat.bind(this, 6), { showInPanel: false });
+pb.registerShortcut('View eighth chat', shortcuts.eighthChat, viewChat.bind(this, 7), { showInPanel: false });
+pb.registerShortcut('View ninth chat', shortcuts.ninthChat, viewChat.bind(this, 8), { showInPanel: false });
 
 pb.registerShortcut('Search Messenger', shortcuts.searchMessenger, (event, state) => {
-
   let searchElem = page.getSearchMessengerElement()
   if (searchElem === document.activeElement) {
     triggerMouseEvent(page.getMessageInputElement(), 'click');
@@ -194,7 +203,7 @@ pb.registerShortcut('Search Messenger', shortcuts.searchMessenger, (event, state
   event.stopPropagation();
 });
 
-pb.registerShortcut('Search Conversation', shortcuts.searchConversation, (event, state) => {
+pb.registerShortcut('Search chat', shortcuts.searchConversation, (event, state) => {
   let done = page.getSearchConversationDoneElement();
   if (done) {
     triggerMouseEvent(done, 'click');
@@ -211,8 +220,8 @@ pb.registerShortcut('Focus on message input', shortcuts.messageInput, (event, st
   event.stopPropagation();
 });
 
-pb.registerShortcut('Compose new message', shortcuts.composeMessage, (event, state) => {
-  triggerMouseEvent(page.getComposeMessageElement(), 'click');
+pb.registerShortcut('Toggle chat information', shortcuts.toggleInfo, (event, state) => {
+  triggerMouseEvent(page.getConversationInfo(), 'click');
   event.preventDefault();
   event.stopPropagation();
 });
@@ -222,22 +231,6 @@ pb.registerShortcut('Compose new message', shortcuts.composeMessage, (event, sta
   event.preventDefault();
   event.stopPropagation();
 });
-
-function viewChat(i, event, state) {
-  triggerMouseEvent(page.getRow(i), 'click');
-  event.preventDefault();
-  event.stopPropagation();
-}
-
-pb.registerShortcut('View first chat', shortcuts.firstChat, viewChat.bind(this, 0));
-pb.registerShortcut('View second chat', shortcuts.secondChat, viewChat.bind(this, 1));
-pb.registerShortcut('View third chat', shortcuts.thirdChat, viewChat.bind(this, 2));
-pb.registerShortcut('View fourth chat', shortcuts.fourthChat, viewChat.bind(this, 3), { showInPanel: false });
-pb.registerShortcut('View fifth chat', shortcuts.fifthChat, viewChat.bind(this, 4), { showInPanel: false });
-pb.registerShortcut('View sixth chat', shortcuts.sixthChat, viewChat.bind(this, 5), { showInPanel: false });
-pb.registerShortcut('View seventh chat', shortcuts.seventhChat, viewChat.bind(this, 6), { showInPanel: false });
-pb.registerShortcut('View eighth chat', shortcuts.eighthChat, viewChat.bind(this, 7), { showInPanel: false });
-pb.registerShortcut('View ninth chat', shortcuts.ninthChat, viewChat.bind(this, 8), { showInPanel: false });
 
 let plugin = pb.build();
 export default plugin;

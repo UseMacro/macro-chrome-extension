@@ -116,20 +116,19 @@ function clearHighlights(page) {
 let page = new GooglePage();
 
 let shortcuts = {
-  down: 'j',
-  up: 'k',
-  right: 'l',
-  left: 'h',
-  openLink: 'enter',
+  down: 'alt+j',
+  up: 'alt+k',
+  right: 'alt+l',
+  left: 'alt+h',
+  openLink: 'alt+enter',
   openLinkNewTab: 'command+enter',
-  focusSearchInput: '/',
   highlightSearchInput: 'command+/',
-  navigateAllTab: 'a',
-  navigateImagesTab: 'i',
-  navigateVideosTab: 'v',
-  navigateMapsTab: 'm',
-  navigateNewsTab: 'n',
-  navigateShoppingTab: 's',
+  navigateAllTab: 'alt+a',
+  navigateImagesTab: 'alt+i',
+  navigateVideosTab: 'alt+v',
+  navigateMapsTab: 'alt+m',
+  navigateNewsTab: 'alt+n',
+  navigateShoppingTab: 'alt+s',
 };
 
 ///////////////////////
@@ -141,6 +140,18 @@ pb.setUrlRegex(/^https:\/\/www.google.[a-z]{2,3}\/search\?.*&tbm=isch/);
 
 pb.setInitialState({
   linkIndex: 0
+});
+
+pb.registerShortcut('Open link', shortcuts.openLink, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+  triggerMouseEvent(getLink(page, state.linkIndex), 'click');
+});
+
+pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, state) => {
+  if (getSearchInput() === document.activeElement) return;
+
+  let link = getLink(page, state.linkIndex);
+  window.open(link.href, '_blank');
 });
 
 function incrementIndex(state, val) {
@@ -254,36 +265,7 @@ function navigate(link) {
   if (link) location.href = link.href;
 }
 
-pb.registerShortcut('Open link', shortcuts.openLink, (event, state) => {
-  if (getSearchInput() === document.activeElement) return;
-  triggerMouseEvent(getLink(page, state.linkIndex), 'click');
-});
-
-pb.registerShortcut('Open link in new tab', shortcuts.openLinkNewTab, (event, state) => {
-  if (getSearchInput() === document.activeElement) return;
-
-  let link = getLink(page, state.linkIndex);
-  window.open(link.href, '_blank');
-});
-
-pb.registerShortcut('Focus on Search Input', shortcuts.focusSearchInput, (event, state) => {
-  if (getSearchInput() === document.activeElement) return;
-
-  let searchInput = getSearchInput();
-  searchInput.focus();
-  event.preventDefault();
-  event.stopPropagation();
-
-  // Always move cursor to the back
-  // @ts-ignore
-  let val = searchInput.value;
-  // @ts-ignore
-  searchInput.value = '';
-  // @ts-ignore
-  searchInput.value = val;
-});
-
-pb.registerShortcut('Highlight Search Input', shortcuts.highlightSearchInput, (event, state) => {
+pb.registerShortcut('Jump to search input', shortcuts.highlightSearchInput, (event, state) => {
   if (getSearchInput() === document.activeElement) return;
 
   let searchInput = getSearchInput();
