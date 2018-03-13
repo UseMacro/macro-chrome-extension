@@ -160,37 +160,39 @@ function initPanel(tab, data, show) {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (tab.url && changeInfo.hasOwnProperty('status') && changeInfo.status === 'complete') {
-    // We only want to load a content script if there is no existing content
-    // script on the client side. A handshake confirms whether there is a
-    // content script listening.
-    chrome.tabs.sendMessage(tabId, { handshake: true }, (response) => {
-      if (response && response.handshake) { return; }
-
-      let plugin = getPlugin(tab.url);
-      if (plugin) {
-        loadPanel(tab, false);
-        let pluginName = plugin.default.pluginName;
-        chrome.tabs.executeScript(tabId, { file: pluginName + '.js' }, () => {
-          chrome.tabs.insertCSS(tabId, { file: pluginName + '.css' }, () => {});
-          chrome.tabs.sendMessage(tabId, { loadShortcuts: true });
-        });
-        setMacroIconAsActive(tabId, true);
-      } else {
-        initShortcuts(tab.url, (data) => {
-          if (data.notFound === true) {
-            setMacroIconAsActive(tabId, false);
-          } else {
-            setMacroIconAsActive(tabId, true);
-            loadPanel(tab, false);
-          }
-        });
-      }
-    });
+    loadShortcutDataAndPanel(tab);
+    checkIfIconShouldBeActive(tab);
   } else if (changeInfo.hasOwnProperty('status') && changeInfo.status === 'loading') {
     // Prevent icon from flashing as active when reloading page
     checkIfIconShouldBeActive(tab);
   }
 });
+
+function loadShortcutDataAndPanel(tab) {
+  // We only want to load a content script if there is no existing content
+  // script on the client side. A handshake confirms whether there is a
+  // content script listening.
+  chrome.tabs.sendMessage(tab.id, { handshake: true }, (response) => {
+    if (response && response.handshake) { return; }
+
+    let plugin = getPlugin(tab.url);
+    if (plugin) {
+      loadPanel(tab, false);
+      let pluginName = plugin.default.pluginName;
+      chrome.tabs.executeScript(tab.id, { file: pluginName + '.js' }, () => {
+        chrome.tabs.insertCSS(tab.id, { file: pluginName + '.css' }, () => {});
+        chrome.tabs.sendMessage(tab.id, { loadShortcuts: true });
+      });
+    } else {
+      initShortcuts(tab.url, (data) => {
+        if (data.notFound !== true) {
+          // render shortcut data even though we have no plugins
+          loadPanel(tab, false);
+        }
+      });
+    }
+  });
+}
 
 function loadPanel(tab, show) {
   let key = getShortcutsDataPath(tab.url);
@@ -261,6 +263,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 chrome.tabs.onActivated.addListener(activeInfo => {
   chrome.tabs.get(activeInfo.tabId, checkIfIconShouldBeActive);
+  chrome.tabs.get(activeInfo.tabId, loadShortcutDataAndPanel);
 });
 
 function checkIfIconShouldBeActive(tab) {
