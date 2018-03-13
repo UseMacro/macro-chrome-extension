@@ -6,10 +6,13 @@ Macro aims to provide an open-source plugin system to crowdsource custom shortcu
 
 This is an upcoming feature for Macro. Support for new plugins will be added as Macro scales to support more of the web.
 
-## Local Development 
+## Local Development
 ### Getting Started
 1. `yarn install`
 2. `webpack --watch`
+
+## Production
+`webpack --optimize-minimize`
 
 ## Shortcut configuration file
 
