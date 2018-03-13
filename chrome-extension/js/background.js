@@ -199,6 +199,7 @@ function loadPanel(tab, show) {
       });
     } else {
       initPanel(tab, data, show);
+      initOnboardingPopupOnFirstVisit(tab, data);
     }
   });
 }
