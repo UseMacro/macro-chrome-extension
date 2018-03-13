@@ -38,7 +38,9 @@ export class Plugin {
 
   init() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request.loadShortcuts) {
+      if (request.handshake) {
+        sendResponse({ handshake: true });
+      } else if (request.loadShortcuts) {
         key.filter = (event) => true;
         for (let s of this.shortcuts) {
           key(s.keys.join(', '), (event, handler) => {
