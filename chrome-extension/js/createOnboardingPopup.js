@@ -84,19 +84,20 @@ let styles = {
   },
   container: {
     position: 'fixed',
-    zIndex: '1000',
+    zIndex: '9000',
     width: '100%',
     height: '100%',
     top: '0',
     left: '0',
     right: '0',
     bottom: '0',
-    fontFamily: 'Overpass',
+    fontFamily: 'Overpass,Helvetica',
     fontSize: '12px',
     lineHeight: '1.5'
   },
   popup: {
     position: 'absolute',
+    zIndex: '9100',
     top: '10px',
     right: '30px',
     backgroundColor: '#F7FCFF',

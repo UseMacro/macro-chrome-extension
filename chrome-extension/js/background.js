@@ -185,7 +185,7 @@ function loadShortcutDataAndPanel(tab) {
       });
     } else {
       initShortcuts(tab.url, (data) => {
-        if (data.notFound !== true) {
+        if (data.sections.length > 0) {
           // render shortcut data even though we have no plugins
           loadPanel(tab, false);
         }
@@ -212,7 +212,7 @@ function loadPanel(tab, show) {
 chrome.browserAction.onClicked.addListener(tab => {
   let key = getShortcutsDataPath(tab.url);
   get(key, (data) => {
-    if (data.notFound !== true) {
+    if (data.sections.length > 0) {
       loadPanel(tab, true);
     }
   });
@@ -273,7 +273,7 @@ function checkIfIconShouldBeActive(tab) {
   } else {
     let key = getShortcutsDataPath(tab.url);
     getShortcutData(key, (data) => {
-      setMacroIconAsActive(tab.id, data.notFound !== true);
+      setMacroIconAsActive(tab.id, data.sections.length > 0);
     });
   }
 }
