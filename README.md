@@ -7,7 +7,6 @@ Macro aims to provide an open-source plugin system to crowdsource custom shortcu
 This is an upcoming feature for Macro. Support for new plugins will be added as Macro scales to support more of the web.
 
 ## Local Development
-### Getting Started
 1. `yarn install`
 2. `webpack --watch`
 
@@ -22,3 +21,6 @@ convention for all configuration files is `{domain-name}.json`. For example,
 collisions between configuration files.
 
 Learn more here: https://github.com/UseMacro/macro-data
+
+## Data Policy
+Read our data policy here: https://github.com/UseMacro/macro-chrome-extension/blob/master/data-policy.md
