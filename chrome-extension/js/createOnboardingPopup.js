@@ -52,17 +52,13 @@ class OnboardingPopup extends Component {
   render() {
     let sectionIndex1 = this.props.first ? 0 : this.randInt(0, this.props.data.sections.length - 1);
     let shortcutIndex1 = this.props.first ? 0 : this.randInt(0, this.props.data.sections[sectionIndex1].shortcuts.length - 1);
-    let sectionIndex2 = this.props.first ? 0 : this.randInt(0, this.props.data.sections.length - 1);
-    let shortcutIndex2 = this.props.first ? 1 : this.randInt(0, this.props.data.sections[sectionIndex2].shortcuts.length - 1);
     let shortcutHint1 = this.props.data.sections[sectionIndex1].shortcuts[shortcutIndex1];
-    let shortcutHint2 = this.props.data.sections[sectionIndex2].shortcuts[shortcutIndex2];
 
     return this.state.show ? <div style={styles.container} onClick={() => this.close()}>
       <div style={styles.pointer}/>
       <div style={styles.popup} onClick={this.cancel}>
-        <p style={[styles.reset, styles.primary, {marginTop: '10px'}]}>Press {shortcutHint1.keys[0].default} to {shortcutHint1.name.toLowerCase()}.</p>
-        <p style={[styles.reset, styles.primary]}>Press {shortcutHint2.keys[0].default} to {shortcutHint2.name.toLowerCase()}.</p>
-        <p style={styles.secondary}>Discover more {this.name} shortcuts by pressing Alt+/ or by clicking the Macro icon.</p>
+        <p style={[styles.reset, styles.primary, {marginTop: '10px'}]}>Tip: Press {shortcutHint1.keys[0].default} to {shortcutHint1.name.toLowerCase()}.</p>
+        <p style={styles.secondary}>Discover more {this.name} shortcuts by pressing <span style={styles.highlight}>Alt+/</span> or by clicking the Macro icon.</p>
         <div style={styles.footer}>
           <div style={styles.button} onClick={() => this.close()}>
             <p style={[styles.reset, styles.secondary]}>GOT IT</p>
@@ -95,9 +91,13 @@ let styles = {
     fontSize: '9px',
     paddingTop: '3px'
   },
+  highlight: {
+    fontWeight: '700',
+    color: '#2B91D9'
+  },
   container: {
     position: 'fixed',
-    zIndex: '9000',
+    zIndex: '90000',
     width: '100%',
     height: '100%',
     top: '0',
@@ -110,7 +110,7 @@ let styles = {
   },
   popup: {
     position: 'absolute',
-    zIndex: '9100',
+    zIndex: '91000',
     top: '10px',
     right: '30px',
     backgroundColor: '#F7FCFF',
@@ -152,7 +152,7 @@ let styles = {
     borderLeft: '10px solid transparent',
     borderRight: '10px solid transparent',
     borderBottom: '10px solid #F7FCFF',
-    zIndex: '9200'
+    zIndex: '92000'
   },
 }
 
