@@ -1,5 +1,9 @@
 import * as key from 'keymaster';
 
+function isBackgroundCode() {
+  return window.chrome && chrome.runtime && chrome.runtime.id;
+}
+
 class PluginState {
   state: any;
 
@@ -29,6 +33,10 @@ export class Plugin {
   pluginState: any;
 
   constructor(pluginName: string, urlRegex: any, shortcuts: any[], state: any) {
+    if (!isBackgroundCode() && (window as any).MACRO_SCRIPT) {
+      console.log('Prevented duplicate script');
+      return;
+    }
     this.pluginName = pluginName;
     this.urlRegex = urlRegex;
     this.shortcuts = shortcuts; // DS
@@ -37,6 +45,9 @@ export class Plugin {
   }
 
   init() {
+    if (!isBackgroundCode()) {
+      (window as any).MACRO_SCRIPT = true;
+    }
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.handshake) {
         sendResponse({ handshake: true });
