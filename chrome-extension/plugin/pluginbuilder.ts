@@ -153,9 +153,10 @@ export class PluginBuilder {
       throw 'URL regex is missing'
     }
 
-    if (Object.keys(this.shortcuts).length === 0) {
-      throw 'You need at least one shortcut for a plugin.';
-    }
+    // TODO: Consider implications of commenting the below out ... later
+    //if (Object.keys(this.shortcuts).length === 0) {
+    //  throw 'You need at least one shortcut for a plugin.';
+    //}
 
     let shortcuts = [];
     for (let name in this.shortcuts) {
