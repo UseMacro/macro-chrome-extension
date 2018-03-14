@@ -123,6 +123,9 @@ function mergeData(shortcuts, plugin) {
     shortcuts: plugin.default.getShortcutsMDS()
   };
   shortcuts.sections.push(pluginSection);
+  shortcuts.sections = shortcuts.sections.filter(s => {
+    return s.shortcuts.length > 0;
+  });
   return shortcuts;
 }
 
