@@ -105,8 +105,7 @@ let shortcuts = {
 let pb = new PluginBuilder();
 
 pb.setPluginName('Google');
-pb.setUrlRegex(/^https:\/\/www.google.[a-z]{2,3}\/search\?((?!tbm=isch).)*$/);
-
+pb.setUrlRegex(/^https:\/\/www.google.[a-z]{2,3}(\.[a-z]{2,3})?\/search\?((?!tbm=isch).)*$/);
 pb.setInitialState({
   linkIndex: 0
 });
