@@ -132,7 +132,7 @@ function mergeData(shortcuts, plugin) {
 function initShortcuts(url, callback) {
   let plugin = getPlugin(url);
   if (plugin) {
-    tracker.sendEvent('shortcuts', 'plugin-initialized', plugin.default.pluginName);
+    tracker.sendEvent('plugins', 'initialized', plugin.default.pluginName);
     // success handler: if got plugins, merge MD shortcuts with plugins, cache & render
     let key = getShortcutsDataPath(url);
     getShortcutData(key, (shortcuts) => {
@@ -143,7 +143,6 @@ function initShortcuts(url, callback) {
   } else {
     // failure handler: if no plugins, use MD shortcuts, cache & render
     let key = getShortcutsDataPath(url);
-    tracker.sendEvent('shortcuts', 'initialized', key);
     getShortcutData(key, (shortcuts) => {
       save(key, shortcuts);
       callback(shortcuts);
@@ -155,7 +154,7 @@ function initPanel(tab, data, show) {
   if (data.sections.length > 0) {
     let code = 'var data = ' + JSON.stringify(data) + '; var show = ' + show + ';';
     chrome.tabs.executeScript(tab.id, { code: code }, () => {
-      tracker.sendEvent('popup', 'script-executed', data.name);
+      tracker.sendEvent('shortcuts', 'initialized', data.name);
       chrome.tabs.executeScript(tab.id, { file: 'createPanel.js' })
     });
   }
@@ -216,6 +215,7 @@ chrome.browserAction.onClicked.addListener(tab => {
   let key = getShortcutsDataPath(tab.url);
   get(key, (data) => {
     if (data.sections.length > 0) {
+      tracker.sendEvent('browser-action', 'click', plugin.default.pluginName);
       showOnboardingPopup(tab, data, false);
     }
   });
@@ -239,6 +239,7 @@ function initOnboardingPopupOnFirstVisit(tab, data) {
   get(key, (visited) => {
     if (visited == null) {
       save(key, true);
+      tracker.sendEvent('onboarding', 'show', plugin.default.pluginName);
       showOnboardingPopup(tab, data, true)
     }
   });
