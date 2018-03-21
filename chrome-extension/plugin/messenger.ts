@@ -214,8 +214,13 @@ pb.registerShortcut('Search chat', shortcuts.searchConversation, (event, state) 
   event.stopPropagation();
 });
 
-pb.registerShortcut('Focus on message input', shortcuts.messageInput, (event, state) => {
-  triggerMouseEvent(page.getMessageInputElement(), 'click');
+pb.registerShortcut('Toggle focus on message input', shortcuts.messageInput, (event, state) => {
+  let messageInput = page.getMessageInputElement();
+  if (messageInput === document.activeElement) {
+    (messageInput as any).blur();
+  } else {
+    triggerMouseEvent(page.getMessageInputElement(), 'click');
+  }
   event.preventDefault();
   event.stopPropagation();
 });
