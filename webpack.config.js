@@ -28,7 +28,7 @@ if (fileSystem.existsSync(secretsPath)) {
 
 var fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf", "woff", "woff2"];
 
-var plugins = ['google', 'messenger', 'google-images', 'dropbox-paper', 'slack'];
+var plugins = ['google', 'messenger', 'google-images', 'dropbox-paper', 'slack', 'gmail'];
 
 var options = {
   entry: {
